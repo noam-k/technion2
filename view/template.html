@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<!-- Template by quackit.com -->
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<link rel="icon" type="image/png" href="img/icon.png" />
+	<title>Title - {page_sub_title}</title>
+	<style type="text/css">
+		body {
+			min-width: 630px;
+		}
+
+		#container {
+			padding-left: 200px;
+			padding-right: 190px;
+		}
+
+		#container .column {
+			position: relative;
+			float: left;
+		}
+
+		#center {
+			padding: 10px 20px;
+			width: 100%;
+		}
+
+		#left {
+			width: 180px;
+			padding: 0 10px;
+			right: 240px;
+			margin-left: -100%;
+		}
+
+		#right {
+			width: 130px;
+			padding: 0 10px;
+			margin-right: -100%;
+		}
+
+		#footer {
+			clear: both;
+		}
+
+		/* IE hack */
+		* html #left {
+			left: 150px;
+		}
+
+		/* Make the columns the same height as each other */
+		#container {
+			overflow: hidden;
+		}
+
+		#container .column {
+			padding-bottom: 1001em;
+			margin-bottom: -1000em;
+		}
+
+		/* Fix for the footer */
+		* html body {
+			overflow: hidden;
+		}
+
+		* html #footer-wrapper {
+			float: left;
+			position: relative;
+			width: 100%;
+			padding-bottom: 10010px;
+			margin-bottom: -10000px;
+			background: #fff;
+		}
+
+		/* Aesthetics */
+		body {
+			margin: 0;
+			padding: 0;
+			font-family:Sans-serif;
+			line-height: 1.5em;
+		}
+
+		p {
+			color: #555;
+		}
+
+		nav ul {
+			list-style-type: none;
+			margin: 0;
+			padding: 0;
+		}
+
+		nav ul a, #explaination a {
+			color: darkgreen;
+			text-decoration: none;
+		}
+		nav ul a:hover{
+			text-decoration: underline;
+		}
+
+		#header, #footer {
+			font-size: large;
+			padding: 0.3em;
+			background: #BCCE98;
+		}
+
+		#left {
+			background: #DAE9BC;
+		}
+
+		#right {
+			background: #F7FDEB;
+		}
+
+		#center {
+			background: #fff;
+		}
+
+		#container .column {
+			padding-top: 1em;
+		}
+		a {
+			color: #555;
+		}
+		#header a {
+			text-decoration: none;
+		}
+		#header img {
+			max-height: 100%;
+			height: 30px;
+			object-fit: contain;
+		}
+		.even {
+			background-color: #f0f0f0
+		}
+		.odd {
+			background-color: #dfdfdf
+		}
+		table {
+			text-align: center;
+		}
+		th {
+			background-color: #BCCE98;
+		}
+		#announcement {
+			color: red;
+			border-color: #000;
+			border-width: thin;
+		}
+		#explainationContent {
+			display: none;
+			font-size: x-small;
+		}
+		.controls textarea {
+			width: 100%;
+		}
+	</style>
+	<script>
+		function toggleDiv(name, button){
+			if (document.getElementById(name).style.display == 'block') {
+				document.getElementById(name).style.display = 'none';
+				document.getElementById(button).src = 'img/show_more.png';
+			} else {
+				document.getElementById(name).style.display = 'block';
+				document.getElementById(button).src = 'img/show_less.png';
+			}
+		};
+		setTimeout(function(){
+			var announce = document.getElementById('announcement');
+			if (announce) {
+				announce.style.display = "none";
+			}
+		}, 3000);
+	</script>
+</head>
+<body>
+	<header id="header"><h3><a href="index.php"><img src="img/icon.png"> LabAdmin alert system</a></h3></header>
+	<div id="container">
+		<main id="center" class="column">
+			<article>
+				{page_header}
+				<p>{page_content}</p>
+			</article>
+		</main>
+		<nav id="left" class="column">
+			<h3>Navigation</h3>
+			<ul>
+				<li><a href="rulesList.php">See all rules</a></li>
+				<li><a href="newBasicRule.php">New rule (basic)</a></li>
+				<li><a href="newFlexibleRule.php">New rule (flexible)</a></li>
+			</ul>
+		</nav>
+		<div id="right" class="column">
+			<h3>Right heading</h3>
+			<p>Right text text text text text text text text text</p>
+		</div>
+	</div>
+	<div id="footer-wrapper">
+		<footer id="footer"><p>
+			<a href="http://labadmin.ef.technion.ac.il/">Labadmin</a><br>
+			<a href="http://www.ee.technion.ac.il">Electrical Engineering faculty of the Technion - Israel institute of Technology</a>
+		</p></footer>
+	</div>
+</body>
+</html>
