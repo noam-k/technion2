@@ -55,7 +55,7 @@ class RulesView {
     * @var string
     */
     protected $creatorMailLink = '<a href="">Roy Mitrany</a>, or the project programmer,
-    <a href="mailto:noam.kritenberg@gmail.com">Noam Kritenberg</a>';
+    <a href="">Noam Kritenberg</a>';
 
     /**
     * @var string
