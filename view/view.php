@@ -54,7 +54,7 @@ class RulesView {
     /**
     * @var string
     */
-    protected $creatorMailLink = '<a href="mailto:roym@technion.ac.il">Roy Mitrany</a>, or the project programmer,
+    protected $creatorMailLink = '<a href="">Roy Mitrany</a>, or the project programmer,
     <a href="mailto:noam.kritenberg@gmail.com">Noam Kritenberg</a>';
 
     /**
@@ -119,8 +119,9 @@ class RulesView {
 
     protected function setFlexibleRulesEvents() {
         return '<script>
+            var formula = window.getElementsByName("formula")[0].parentElement.parentElement;
 
-        </script>'
+        </script>';
     }
 
     /**
