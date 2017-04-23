@@ -119,9 +119,48 @@ class RulesView {
 
     protected function setFlexibleRulesEvents() {
         return '<script>
-            var formula = window.getElementsByName("formula")[0].parentElement.parentElement;
-
-        </script>';
+        function disable(prop) {
+            var elem = document.getElementsByName(prop)[0];
+            elem.parentNode.parentNode.style.display = "none";
+            elem.disabled = true;
+        }
+        function enable(prop) {
+            var elem = document.getElementsByName(prop)[0];
+            elem.parentNode.parentNode.style.display = "block";
+            elem.disabled = false;
+        }
+        window.onload = function(){
+            function disableAsDefault(prop) {
+                var elem = document.getElementsByName(prop)[0];
+                elem.parentNode.parentNode.style.display = "none";
+            }
+            disableAsDefault("formula");
+            disableAsDefault("email_address");
+            disableAsDefault("labadmin_group");
+            disableAsDefault("SQL_defined_group");
+            document.getElementsByName("condition_or_set")[0].onclick = function(){
+                enable("formula");
+            }
+            document.getElementsByName("condition_or_set")[1].onclick = function(){
+                disable("formula");
+            }
+            document.getElementsByName("send_mail_to")[0].onclick = function(){
+                enable("email_address");
+                disable("labadmin_group");
+                disable("SQL_defined_group");
+            }
+            document.getElementsByName("send_mail_to")[1].onclick = function(){
+                disable("email_address");
+                enable("labadmin_group");
+                disable("SQL_defined_group");
+            }
+            document.getElementsByName("send_mail_to")[2].onclick = function(){
+                disable("email_address");
+                disable("labadmin_group");
+                enable("SQL_defined_group");
+            }
+        }
+    </script>';
     }
 
     /**
@@ -132,7 +171,7 @@ class RulesView {
         $this->explaination = $explaination;
         $content = '';
         if ($flexible) {
-            $this->setFlexibleRulesEvents();
+            $content .= $this->setFlexibleRulesEvents();
         }
         if ($newRuleAdded) {
             $this->announcement = 'New rule added successfully';
