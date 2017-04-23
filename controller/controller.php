@@ -29,11 +29,46 @@ class RulesController {
     */
     protected $view;
 
+    /**
+    * @var array
+    */
+    protected $notAllowedSQLFunctions = array('UPDATE', 'INSERT', 'DROP', 'CREATE', 'DELETE', 'MERGE', 'COMMIT', 'ALTER', 'TRUNCATE');
+
     public function __construct() {
         $this->model = new RulesModel();
         $this->view = new RulesView();
     }
 
+    /**
+    * Note that filter_var returns the variable given, which can be evaluated to a value that is equivalent to false
+    * (e.g. 0, empty string etc.). By explicitly comparing it to "false" we return the expected result
+    * @var $value mixed
+    * @var $validationType int defined in RulesModel
+    * @return book
+    */
+    protected function validate($value, $validationType) {
+        switch ($validationType) {
+            case RulesModel::EMAIL :
+                return filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
+                break;
+            case RulesModel::SQL :
+                foreach ($this->notAllowedSQLFunctions as $word) {
+                    if (stripos($value, $word)!== false) {
+                        return false;
+                    }
+                }
+                return true;
+                break;
+            case RulesModel::FORMULA :
+                    if (preg_match('/[a-wyz]/i', $value)) { # match all Latin characters except for x
+                        return false;
+                    }
+                    return true;
+                break;
+            default:
+                return false; # Should not come here
+        }
+    }
     /**
     * validation of the data, and sending a request to create it in the model (DB)
     */
@@ -51,6 +86,21 @@ class RulesController {
             }*/
         }
         $this->newRuleAdded = $this->model->addNewBasicRule();
+    }
+
+    public function processFlexibleInput() {
+        foreach ($this->model->getNewFlexibleRuleFormData() as $fieldName => $details) {
+            if (!empty($details['properties']['required']) == RulesModel::REQUIRED && !isset($_POST[$fieldName])) {
+                throw new Exception("Error: required field wasn't found: ".$fieldName, self::REQUIRED_FIELD_NOT_FOUND);
+            }
+            if (!empty($details['validation']) && isset($_POST[$fieldName])) {
+                $valid = $this->validate($_POST[$fieldName], $details['validation']);
+                if (!$valid) {
+                    throw new Exception("Error: failed to process data: ".$fieldName, self::FIELD_VALIDATION_FAILED);
+                }
+            }
+        }
+        $this->newRuleAdded = $this->model->addNewFlexibleRule();
     }
 
     public function renderAddNewBasicRulePage() {

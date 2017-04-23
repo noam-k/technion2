@@ -29,7 +29,7 @@ class RulesView {
 		     <li>Write a formula</li>
 		     <li>If the <b>number of entries</b> in the result satisfies the formula - continue to the next step</li>
         </ol>
-    <li>Refer to the results as a set of entries. Eexcute the next step for each one entry</li>
+    <li>Refer to the results as a set of entries. Eexcute the next step for each entry</li>
     </ol>
     <li>Choose who should get an email alert</li>
     <ol>
@@ -123,11 +123,13 @@ class RulesView {
             var elem = document.getElementsByName(prop)[0];
             elem.parentNode.parentNode.style.display = "none";
             elem.disabled = true;
+            elem.required = false;
         }
         function enable(prop) {
             var elem = document.getElementsByName(prop)[0];
             elem.parentNode.parentNode.style.display = "block";
             elem.disabled = false;
+            elem.required = true;
         }
         window.onload = function(){
             function disableAsDefault(prop) {

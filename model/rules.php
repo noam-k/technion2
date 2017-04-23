@@ -5,6 +5,13 @@ class RulesModel {
     const REQUIRED = 1;
 
     /**
+    * validation indicators
+    */
+    const SQL = 101;
+    const EMAIL = 102;
+    const FORMULA = 103;
+
+    /**
     * @var PDO
     */
     protected $dbh;
@@ -13,6 +20,11 @@ class RulesModel {
     * @var string
     */
     protected $rulesTable = 'rules';
+
+    /**
+    * @var string
+    */
+    protected $flexibleRulesTable = 'flexibleRules';
 
     /**
     * @var string
@@ -118,21 +130,27 @@ class RulesModel {
 
     public function getNewFlexibleRuleFormData() {
         return array(
+            'description' => array(
+                'type' => 'textarea',
+                'properties' => array('required' => 1, 'longDesc' => 'Rule description'),
+            ),
             'sql_query' => array(
                 'type' => 'textarea',
                 'properties' => array('required' => 1, 'longDesc' => 'SQL Query that will serve as the rule\'s base'),
+                'validation' => self::SQL,
             ),
             'condition_or_set' => array(
                 'type' => 'radio',
                 'options' => $this->condition_or_setOptions,
-                'properties' => array('required' => 1, 'longeDesc' => '<strong>"Set"</stgong> means the rule will apply
-                 to every line of SQL result. <strong>"Formula"</strong> means the SQL result will be counted and
-                 treated as a number, and the rule will apply only if the <strong>formula</strong> will be satisfied by
-                 this number. ')
+                'properties' => array('required' => 1,)
             ),
             'formula' => array(
                 'type' => 'textbox',
-                'properties' => array('required' => 1, 'disabled' => 1), # enabled when condition_or_set = formula
+                'properties' => array(
+                    'longDesc' => 'Use the letter X to represent the number returned as a result from the SQL query',
+                    'labelToPlaceholder' => 'try',
+                    'disabled' => 1,), # enabled when condition_or_set = formula
+                'validation' => self::FORMULA,
             ),
             'send_mail_to' => array(
                 'type' => 'radio',
@@ -141,16 +159,18 @@ class RulesModel {
             ),
             'email_address' => array(
                 'type' => 'textbox',
-                'properties' => array('required' => 1, 'disabled' => 1) # enable on send_mail_to = address
+                'properties' => array('disabled' => 1), # enable on send_mail_to = address
+                'validation' => self::EMAIL,
             ),
             'labadmin_group' => array(
                 'type' => 'select',
                 'options' => $this->labadmin_groupOptions,
-                'properties' => array('required' => 1, 'disabled' => 1), # enable on send_mail_to = labadmin_group
+                'properties' => array('label'=> 'LabAdmin group', 'disabled' => 1), # enable on send_mail_to = labadmin_group
             ),
             'SQL_defined_group' => array(
                 'type' => 'textarea',
-                'properties' => array('label' => 'SQL defined group', 'required' => 1, 'disabled' => 1), # enable on send_mail_to = sql
+                'properties' => array('label' => 'SQL defined group', 'disabled' => 1), # enable on send_mail_to = sql
+                'validation' => self::SQL,
             )
         );
     }
@@ -173,6 +193,38 @@ class RulesModel {
         foreach ($fields as $field) {
             $values[$field] = $_POST[$field]; # This filters $_POST entries that are not in $this->getRuleFields();
         }
+        return $stmt->execute();
+    }
+
+    /**
+    * Adds a flexible rule to the database, performing an SQL injection security check beforehand. Data is in $_POST.
+    * @return bool on success
+    */
+    public function addNewFlexibleRule() {
+        $flexibleRulesFields = array('description', 'sqlquery', 'formula', 'sendto');
+        $fieldsList = implode(', ', $flexibleRulesFields);
+        $bindingList = implode(', :', $flexibleRulesFields);
+        if ($_POST['condition_or_set'] === 'set') {
+            $formula = 'set';
+        } else {
+            $formula = $_POST['formula'];
+        }
+        if ($_POST['send_mail_to'] === 'One address') {
+            $sendTo = $_POST['email_address'];
+        } elseif ($_POST['send_mail_to'] === 'LabAdmin group') {
+            $sendTo = $_POST['labadmin_group'];
+        } else { # SQL defined group
+            $sendTo = $_POST['SQL_defined_group'];
+        }
+        $query = 'INSERT INTO '.$this->flexibleRulesTable.' ('.$fieldsList.') VALUES (:'. $bindingList .')';
+        $stmt = $this->dbh->prepare($query);
+        foreach ($flexibleRulesFields as $field) {
+            $stmt->bindParam(':'.$field, $values[$field]);
+        }
+        $values['description'] = $_POST['description'];
+        $values['sqlquery'] = $_POST['sql_query'];
+        $values['formula'] = $formula;
+        $values['sendto'] = $sendTo;
         return $stmt->execute();
     }
 
