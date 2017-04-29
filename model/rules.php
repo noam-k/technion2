@@ -171,7 +171,43 @@ class RulesModel {
                 'type' => 'textarea',
                 'properties' => array('label' => 'SQL defined group', 'disabled' => 1), # enable on send_mail_to = sql
                 'validation' => self::SQL,
-            )
+            ),
+            'attach_event' => array(
+                'type' => 'checkbox',
+                'options' => array('attach event')
+            ),
+            'begin_date' => array(
+                'type' => 'dateTime',
+                'properties' => array('disabled' => 1),
+            ),
+            'end_date' => array(
+                'type' => 'dateTime',
+                'properties' => array('disabled' => 1),
+            ),
+            'location' => array(
+                'type' => 'textbox',
+                'properties' => array('disabled' => 1),
+            ),
+            'organizer_mail' => array(
+                'type' => 'textbox',
+                'properties' => array('disabled' => 1),
+            ),
+            'summary' => array(
+                'type' => 'textbox',
+                'properties' => array('disabled' => 1),
+            ),
+            'event_description' => array(
+                'type' => 'textarea',
+                'properties' => array('disabled' => 1),
+            ),
+            'attach_message' => array(
+                'type' => 'checkbox',
+                'options' => array('attach message')
+            ),
+            'message_to_attach' => array(
+                'type' => 'textarea',
+                'properties' => array('disabled' => 1)
+            ),
         );
     }
 

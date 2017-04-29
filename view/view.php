@@ -140,6 +140,14 @@ class RulesView {
             disableAsDefault("email_address");
             disableAsDefault("labadmin_group");
             disableAsDefault("SQL_defined_group");
+            disableAsDefault("begin_date");
+            disableAsDefault("end_date");
+            disableAsDefault("location");
+            disableAsDefault("organizer_mail");
+            disableAsDefault("summary");
+            disableAsDefault("event_description");
+            disableAsDefault("message_to_attach");
+
             document.getElementsByName("condition_or_set")[0].onclick = function(){
                 enable("formula");
             }
@@ -160,6 +168,30 @@ class RulesView {
                 disable("email_address");
                 disable("labadmin_group");
                 enable("SQL_defined_group");
+            }
+            document.getElementsByName("attach_event[]")[0].onclick = function(){
+                if (this.checked) {
+                    enable("begin_date");
+                    enable("end_date");
+                    enable("location");
+                    enable("organizer_mail");
+                    enable("summary");
+                    enable("event_description");
+                } else {
+                    disable("begin_date");
+                    disable("end_date");
+                    disable("location");
+                    disable("organizer_mail");
+                    disable("summary");
+                    disable("event_description");
+                }
+            }
+            document.getElementsByName("attach_message[]")[0].onclick = function(){
+                if (this.checked) {
+                    enable("message_to_attach");
+                } else {
+                    disable("message_to_attach");
+                }
             }
         }
     </script>';
@@ -182,11 +214,14 @@ class RulesView {
         $form->configure(array("prevent" => array("bootstrap")));
         $form->addElement(new Element_HTML('<legend>Rule\'s settings</legend>'));
         foreach ($data as $name => $details) {
-            $elementType = 'Element_'.ucfirst(strtolower($details['type']));
+            $elementType = 'Element_'.ucfirst($details['type']);
             $lable = ucfirst(strtolower(str_replace('_', ' ', $name)));
             if (!empty($details['options'])) {
                 if ($elementType === 'Element_Select') {
                     $details['options'] = array('' => '(select)') + $details['options'];
+                }
+                if (!isset($details['properties'])) {
+                    $details['properties'] = null;
                 }
                 $form->addElement(new $elementType($lable.':', $name, $details['options'], $details['properties']));
             } else {

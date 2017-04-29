@@ -1,6 +1,7 @@
 <?php
 	session_start();
 	include_once("controller/controller.php");
+	#echo '<pre>';
 
 	$rules = new RulesController();
 
