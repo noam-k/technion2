@@ -46,6 +46,11 @@ class RulesModel {
     */
     protected $send_mail_toOptions = array('One address', 'LabAdmin group', 'SQL defined group');
 
+    /**
+    * @var array
+    */
+    protected $flexibleRulesFields = array('description', 'sqlquery', 'formula', 'sendto', 'event', 'message');
+
     public function __construct() {
         require_once 'cfg.php';
 		$this->dbh = new PDO($rulesDatabase['dsn'], $rulesDatabase['username'], $rulesDatabase['password']);
@@ -237,31 +242,22 @@ class RulesModel {
     * @return bool on success
     */
     public function addNewFlexibleRule() {
-        $flexibleRulesFields = array('description', 'sqlquery', 'formula', 'sendto');
-        $fieldsList = implode(', ', $flexibleRulesFields);
-        $bindingList = implode(', :', $flexibleRulesFields);
-        if ($_POST['condition_or_set'] === 'set') {
-            $formula = 'set';
-        } else {
-            $formula = $_POST['formula'];
-        }
-        if ($_POST['send_mail_to'] === 'One address') {
-            $sendTo = $_POST['email_address'];
-        } elseif ($_POST['send_mail_to'] === 'LabAdmin group') {
-            $sendTo = $_POST['labadmin_group'];
-        } else { # SQL defined group
-            $sendTo = $_POST['SQL_defined_group'];
-        }
+        $fields = $this->flexibleRulesFields;
+        $fieldsList = implode(', ', $fields);
+        $bindingList = implode(', :', $fields);
         $query = 'INSERT INTO '.$this->flexibleRulesTable.' ('.$fieldsList.') VALUES (:'. $bindingList .')';
         $stmt = $this->dbh->prepare($query);
-        foreach ($flexibleRulesFields as $field) {
+        foreach ($fields as $field) {
             $stmt->bindParam(':'.$field, $values[$field]);
         }
-        $values['description'] = $_POST['description'];
-        $values['sqlquery'] = $_POST['sql_query'];
-        $values['formula'] = $formula;
-        $values['sendto'] = $sendTo;
-        return $stmt->execute();
+        foreach ($fields as $field) {
+            $values[$field] = $_POST[$field]; # This filters $_POST entries that are not in $this->getRuleFields();
+        }
+        $ret = $stmt->execute();
+        if (!$ret) { # debug
+            print_r($stmt->errorInfo());
+        }
+        return $ret;
     }
 
     /**

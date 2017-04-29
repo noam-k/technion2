@@ -34,6 +34,11 @@ class RulesController {
     */
     protected $notAllowedSQLFunctions = array('UPDATE', 'INSERT', 'DROP', 'CREATE', 'DELETE', 'MERGE', 'COMMIT', 'ALTER', 'TRUNCATE');
 
+    /**
+    * @var array
+    */
+    protected $eventProperties = array('begin_date', 'end_date', 'location', 'organizer_mail', 'summary', 'event_description');
+
     public function __construct() {
         $this->model = new RulesModel();
         $this->view = new RulesView();
@@ -99,6 +104,36 @@ class RulesController {
                     throw new Exception("Error: failed to process data: ".$fieldName, self::FIELD_VALIDATION_FAILED);
                 }
             }
+        }
+        $_POST['sqlquery'] = $_POST['sql_query'];
+        unset($_POST['sql_query']);
+        if ($_POST['condition_or_set'] === 'set') {
+            $_POST['formula'] = 'set';
+            unset($_POST['condition_or_set']);
+        }
+        if ($_POST['send_mail_to'] === 'One address') {
+            $_POST['sendto'] = $_POST['email_address'];
+            unset($_POST['email_address']);
+        } elseif ($_POST['send_mail_to'] === 'LabAdmin group') {
+            $_POST['sendto'] = $_POST['labadmin_group'];
+            unset($_POST['labadmin_group']);
+        } else { # SQL defined group
+            $_POST['sendto'] = $_POST['SQL_defined_group'];
+            unset($_POST['SQL_defined_group']);
+        }
+        unset($_POST['send_mail_to']);
+        if (!empty($_POST['attach_event'][0])) {
+            foreach ($this->eventProperties as $property) {
+                $eventDetails[$property] = $_POST[$property];
+                unset($_POST[$property]);
+            }
+            $_POST['event'] = serialize($eventDetails);
+            unset($_POST['attach_event']);
+        }
+        if (!empty($_POST['attach_message'][0])){
+            $_POST['message'] = $_POST['message_to_attach'];
+            unset($_POST['attach_message']);
+            unset($_POST['message_to_attach']);
         }
         $this->newRuleAdded = $this->model->addNewFlexibleRule();
     }
