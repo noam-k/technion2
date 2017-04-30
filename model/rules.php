@@ -11,20 +11,13 @@ class RulesModel {
     const EMAIL = 102;
     const FORMULA = 103;
 
+    const TABLE_RULES_BASIC = 'rules';
+    const TABLE_RULES_FLEXIBLE = 'flexibleRules';
+
     /**
     * @var PDO
     */
     protected $dbh;
-
-    /**
-    * @var string
-    */
-    protected $rulesTable = 'rules';
-
-    /**
-    * @var string
-    */
-    protected $flexibleRulesTable = 'flexibleRules';
 
     /**
     * @var string
@@ -76,18 +69,34 @@ class RulesModel {
     /**
     * @return array a list of the fields saved for each rule and are PHP relevant
     */
-    public function getRuleFields() {
+    public function getBasicRuleFields() {
         return array_keys($this->getNewBasicRuleFormData());
     }
 
+    public function getFlexibleRuleFields() {
+        return $this->flexibleRulesFields;
+    }
+
+    protected function getFields($table) {
+        if ($table === self::TABLE_RULES_BASIC) {
+            return $this->getBasicRuleFields();
+        }
+        if ($table === self::TABLE_RULES_FLEXIBLE) {
+            return $this->flexibleRulesFields;
+        }
+        throw new Exception('Table unknown: '.$table);
+    }
+
     /**
+    * @var $table string
+    * @var $withId bool
     * @return array all rules' data saved in the system
     */
-    public function getRulesData($withId = false) {
+    public function getRulesData($table, $withId = false) {
         $ret = array();
         $selectFields = ($withId ? $this->rulesIdCol.',' : '');
-        $selectFields .= implode(',', $this->getRuleFields());
-        $query = 'SELECT '.$selectFields.' FROM '.$this->rulesTable;
+        $selectFields .= implode(',', $this->getFields($table));
+        $query = 'SELECT '.$selectFields.' FROM '.$table;
         $sth = $this->dbh->prepare($query);
         $sth->execute();
         $result = $sth->fetchAll(PDO::FETCH_ASSOC);
@@ -223,16 +232,16 @@ class RulesModel {
     */
     public function addNewBasicRule() {
         $_POST['recipients'] = $this->recipientsOptions[$_POST['recipients']]; # A little ugly
-        $fields = $this->getRuleFields();
+        $fields = $this->getBasicRuleFields();
         $fieldsList = implode(', ', $fields);
         $bindingList = implode(', :', $fields);
-        $query = 'INSERT INTO '.$this->rulesTable.' ('.$fieldsList.') VALUES (:'. $bindingList .')';
+        $query = 'INSERT INTO '.self::TABLE_RULES_BASIC.' ('.$fieldsList.') VALUES (:'. $bindingList .')';
         $stmt = $this->dbh->prepare($query);
         foreach ($fields as $field) {
             $stmt->bindParam(':'.$field, $values[$field]);
         }
         foreach ($fields as $field) {
-            $values[$field] = $_POST[$field]; # This filters $_POST entries that are not in $this->getRuleFields();
+            $values[$field] = $_POST[$field]; # This filters $_POST entries that are not in $this->getBasicRuleFields();
         }
         return $stmt->execute();
     }
@@ -245,13 +254,16 @@ class RulesModel {
         $fields = $this->flexibleRulesFields;
         $fieldsList = implode(', ', $fields);
         $bindingList = implode(', :', $fields);
-        $query = 'INSERT INTO '.$this->flexibleRulesTable.' ('.$fieldsList.') VALUES (:'. $bindingList .')';
+        $query = 'INSERT INTO '.self::TABLE_RULES_FLEXIBLE.' ('.$fieldsList.') VALUES (:'. $bindingList .')';
         $stmt = $this->dbh->prepare($query);
         foreach ($fields as $field) {
             $stmt->bindParam(':'.$field, $values[$field]);
         }
         foreach ($fields as $field) {
-            $values[$field] = $_POST[$field]; # This filters $_POST entries that are not in $this->getRuleFields();
+            if (empty($_POST[$field])) {
+                $_POST[$field] = null;
+            }
+            $values[$field] = $_POST[$field]; # This filters $_POST entries that are not in $this->getFlexibleRuleFields()
         }
         $ret = $stmt->execute();
         if (!$ret) { # debug
@@ -262,10 +274,11 @@ class RulesModel {
 
     /**
     * @var $id int
+    * @var $table string
     * @return bool
     */
-    public function deleteRule($id) {
-        $res = $this->dbh->exec('DELETE FROM '.$this->rulesTable.' WHERE '.$this->rulesIdCol.' = '. intval($id));
+    public function deleteRule($id, $table) {
+        $res = $this->dbh->exec('DELETE FROM '.$table.' WHERE '.$this->rulesIdCol.' = '. intval($id));
         return $res === 1;
     }
 }

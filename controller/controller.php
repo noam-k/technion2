@@ -156,13 +156,31 @@ class RulesController {
     * @var admin bool if this is true, we also display a button to remove this rule
     */
     public function renderManageExistingRules($admin = false) {
-        $headers = $this->model->getRuleFields();
-        $rules = $this->model->getRulesData($admin);
-        if ($admin) {
-            $deleteLink = $this->view->getDeleteLinkTemplate();
-            $headers[] = 'delete';
-            foreach ($rules as &$rule) {
-                $rule[] = sprintf($deleteLink, $rule['id']);
+        $tables = array(RulesModel::TABLE_RULES_BASIC, RulesModel::TABLE_RULES_FLEXIBLE,);
+        $headers[RulesModel::TABLE_RULES_BASIC] = $this->model->getBasicRuleFields();
+        $rules[RulesModel::TABLE_RULES_BASIC] = $this->model->getRulesData(RulesModel::TABLE_RULES_BASIC, $admin);
+        $headers[RulesModel::TABLE_RULES_FLEXIBLE] = $this->model->getFlexibleRuleFields();
+        $rules[RulesModel::TABLE_RULES_FLEXIBLE] = $this->model->getRulesData(RulesModel::TABLE_RULES_FLEXIBLE, $admin);
+        foreach ($tables as $table) {
+            if ($admin) {
+                $deleteLink = $this->view->getDeleteLinkTemplate();
+                $headers[$table][] = 'delete';
+            }
+            foreach ($rules[$table] as &$rule) {
+                if (!empty($rule['event'])) {
+                    $eventDetails = unserialize($rule['event']);
+                    $eventBlock = '';
+                    foreach ($eventDetails as $key => $value) {
+                        $eventBlock .= $key.': '.$value.'<br/>';
+                    }
+                    $rule['event'] = sprintf($this->view->getEventHTML(), $eventBlock);
+                }
+                if (!empty($rule['message'])) {
+                    $rule['message'] = sprintf($this->view->getMessageHTML(), $rule['message']);
+                }
+                if ($admin) {
+                    $rule[] = sprintf($deleteLink, $rule['id'], $table);
+                }
                 unset($rule['id']);
             }
         }
@@ -172,8 +190,8 @@ class RulesController {
     /**
     * @var $id int
     */
-    public function deleteRule($id) {
-        if ($this->model->deleteRule($id)) {
+    public function deleteRule($id, $table) {
+        if ($this->model->deleteRule($id, $table)) {
             $this->ruleDeleted = true;
         }
     }

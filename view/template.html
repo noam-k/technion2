@@ -146,7 +146,7 @@
 			border-color: #000;
 			border-width: thin;
 		}
-		#explainationContent {
+		#explainationContent, .hiddenText {
 			display: none;
 			font-size: small;
 		}
@@ -156,6 +156,9 @@
 		.controls textarea {
 			width: 100%;
 		}
+		a:hover + .hiddenText {
+	        display: block;
+	    }
 	</style>
 	<script>
 		function toggleDiv(name, button){

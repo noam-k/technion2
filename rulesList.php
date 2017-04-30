@@ -5,6 +5,6 @@
     #       are admins, but the application can be extended to normal users too
     $admin = true;
     if ($admin && isset($_GET['deleteRule'])) {
-        $controller->deleteRule($_GET['deleteRule']);
+        $controller->deleteRule($_GET['deleteRule'], $_GET['table']);
     }
     $controller->renderManageExistingRules($admin);

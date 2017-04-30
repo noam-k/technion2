@@ -85,7 +85,17 @@ class RulesView {
     /**
     * @var string
     */
-    protected $deleteLink = '<a href="%s?deleteRule=%s"><img src="img/icon_del.gif"/></a>';
+    protected $eventImg = 'img/icon_date.gif';
+
+    /**
+    * @var string
+    */
+    protected $messageImg = 'img/icon_text.gif';
+
+    /**
+    * @var string
+    */
+    protected $deleteLink = '<a href="%s?deleteRule=%s&table=%s"><img src="img/icon_del.gif"/></a>';
 
     protected function renderPage($title, $header, $content) {
         $header = '<h1>'.$header.'</h1>';
@@ -113,8 +123,18 @@ class RulesView {
         return '<div id="explaination">'.$explainationButton.'<div id="explainationContent">'.$explaination.'</div></div>';
     }
 
+    public function getEventHTML() {
+        $src = $this->eventImg;
+        return "<a><img src=$src> (show event details)</a><div class='hiddenText'>%s</div>";
+    }
+
+    public function getMessageHTML() {
+        $src = $this->messageImg;
+        return "<a><img src=$src> (show message)</a><div class='hiddenText'>%s</div>";
+    }
+
     public function getDeleteLinkTemplate() {
-        return sprintf($this->deleteLink, $_SERVER['PHP_SELF'], '%s');
+        return sprintf($this->deleteLink, $_SERVER['PHP_SELF'], '%s', '%s');
     }
 
     protected function setFlexibleRulesEvents() {
@@ -253,24 +273,29 @@ class RulesView {
         if ($ruleDeleted) {
             $this->announcement = 'Rule deleted successfully';
         }
-        $returnValue = '<div id="'.$this->existingRulesTableId.'"><table><thead><tr>';
-        foreach ($headers as $column) {
-            $column = str_replace('_', ' ', $column);
-            $column = ucfirst(strtolower($column));
-            $returnValue.= '<th>'.$column.'</th>';
-        }
-        $returnValue.='</tr></thead><tbody>';
-
-        $odd = true;
-        foreach ($rules as $rule) {
-            $returnValue.='<tr class="'.($odd? self::TR_CLASS_ODD : self::TR_CLASS_EVEN).'">';
-            foreach ($rule as $cell) {
-                $returnValue.='<td>'.$cell.'</td>';
+        $returnValue = '<hr/><div id="'.$this->existingRulesTableId.'">';
+        foreach ($headers as $key => $headerLine) {
+            $returnValue .= '<h3>'.$key.'</h3>';
+            $returnValue .= '<table><thead><tr>';
+            foreach ($headerLine as $column) {
+                $column = str_replace('_', ' ', $column);
+                $column = ucfirst(strtolower($column));
+                $returnValue.= '<th>'.$column.'</th>';
             }
-            $returnValue.='</tr>';
-            $odd = !$odd;
+            $returnValue.='</tr></thead><tbody>';
+            $odd = true;
+            #echo '<pre>'; print_r($rules[$key]); die;
+            foreach ($rules[$key] as $rule) {
+                $returnValue.='<tr class="'.($odd? self::TR_CLASS_ODD : self::TR_CLASS_EVEN).'">';
+                foreach ($rule as $cell) {
+                    $returnValue.='<td>'.$cell.'</td>';
+                }
+                $returnValue.='</tr>';
+                $odd = !$odd;
+            }
+            $returnValue .= '</tbody></table>';
         }
-        $returnValue .= '</tbody></table></div>';
+        $returnValue .= '</div>';
         $this->renderPage(self::PAGE_EXISTING_RULES_TITLE, self::PAGE_EXISTING_RULES_HEADER, $returnValue);
     }
 
