@@ -14,6 +14,50 @@ echo '<pre>'; # debug
 
 $logFile = 'alerts_log.txt';
 
+
+function labAdminAlert($sendTo, $event = null, $message = null) {
+    $mail = new PHPMailer();
+    configureSMTP($mail);
+    $mail->setFrom(EMAIL_SENDER);
+    $mail->Body = $details['message'];
+    if(!empty($details['event'])) {
+        $mail->Ical = makeIcs(unserialize($details['event']));
+    }
+    foreach (createEmailList($details['sendto']) as $email) {
+        $mail->addAddress($email);
+        error_log("Email address added: $email", 3, $logFile);
+    }
+    if ($mail->send()) {
+        $sumMails+= count($emails);
+        error_log("Send successfull".PHP_EOL, 3, $logFile);
+    } else {
+        error_log("Send fail:".$mail->ErrorInfo.PHP_EOL, 3, $logFile);
+    }
+    return $sumMails;
+}
+
+function createEmailList($rawData) {
+    if (strpos($rawData, '@')) { # single email address
+        return explode(',' $rawData);
+    } elseif (is_int($rawData) || ctype_digit($rawData)) { # LabAdmin Group
+        return $labAdmin->getGroupEmails(intval($rawData));
+    } elseif (preg_match('/^.?+select+/i', $rawData)) {  # SQL query that starts in a select
+        return $labadmin->getQueryResults($rawData);
+    }
+    error_log('Error while parsing "sendto" field'. PHP_EOL, 3, $logFile);
+    return array();
+}
+function configureSMTP($mail) {
+    $mail->Host = $smtpConf['hostname'];
+    $mail->Username = $smtpConf['username'];
+    $mail->Password = $smtpConf['password'];
+    $mail->SMTPAuth = $smtpConf['authentication'];
+    $mail->Port = $smtpConf['port'];
+    $mail->IsSmtp();
+}
+
+
+
 $rules = new RulesModel;
 $admin = true;
 
@@ -40,51 +84,15 @@ foreach ($rules->getRulesData(RulesModel::TABLE_RULES_FLEXIBLE, $admin) as $deta
     if ($details['formula'] !== 'set') {
         $resultNumber = $labadmin->getCountSelect($details['sqlqeury']);
         $formula = str_replace(RES_NUM, $resultNumber, $details['formula']);
-        if (eval($formula)) {
-            # TODO continue
+        if (eval($formula)) { # The condition set by the user is fulfilled
+            $emailsCount = labAdminAlert($details['sendto'], $details['event'], $details['message']);
         }
     } else {
         foreach ($labAdmin->getSelectSet($details['sqlqeury']) as $row) {
-            $mail = new PHPMailer();
-            configureSMTP($mail);
-            $mail->setFrom(EMAIL_SENDER);
-            $mail->Body = $details['message'];
-            if(!empty($details['event'])) {
-                $mail->Ical = makeIcs(unserialize($details['event']));
-            }
-            foreach (createEmailList($details['sendto']) as $email) {
-                $mail->addAddress($email);
-                error_log("Email address added: $email", 3, $logFile);
-            }
-            if ($mail->send()) {
-                $sumMails+= count($emails);
-                error_log("Send successfull".PHP_EOL, 3, $logFile);
-            } else {
-                error_log("Send fail:".$mail->ErrorInfo.PHP_EOL, 3, $logFile);
-            }
+            $emailsCount = labAdminAlert($details['sendto'], $details['event'], $details['message']); # TODO: add placeholders
         }
     }
 }
 
-echo 'Total of '.$sumMails.' emails have been sent <br>', PHP_EOL;
+echo 'Total of '.$emailsCount.' emails have been sent <br>', PHP_EOL;
 error_log('Script finished. Total of '.$sumMails.' sent. Time: '.date('Y-m-d H:i:s').PHP_EOL, 3, $logFile);
-
-function createEmailList($rawData) {
-    if (strpos($rawData, '@')) { # single email address
-        return explode(',' $rawData);
-    } elseif (is_int($rawData) || ctype_digit($rawData)) { # LabAdmin Group
-        return $labAdmin->getGroupEmails(intval($rawData));
-    } elseif (preg_match('/^.?+select+/i', $rawData)) {  # SQL query that starts in a select
-        return $labadmin->getQueryResults($rawData);
-    }
-    error_log('Error while parsing "sendto" field'. PHP_EOL, 3, $logFile);
-    return array();
-}
-function configureSMTP($mail) {
-    $mail->Host = $smtpConf['hostname'];
-    $mail->Username = $smtpConf['username'];
-    $mail->Password = $smtpConf['password'];
-    $mail->SMTPAuth = $smtpConf['authentication'];
-    $mail->Port = $smtpConf['port'];
-    $mail->IsSmtp();
-}
