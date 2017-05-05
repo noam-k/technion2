@@ -1,5 +1,7 @@
 <?php
 
+require_once 'cfg.php';
+
 class RulesModel {
 
     const REQUIRED = 1;
@@ -45,7 +47,7 @@ class RulesModel {
     protected $flexibleRulesFields = array('description', 'sqlquery', 'formula', 'sendto', 'event', 'message');
 
     public function __construct() {
-        require_once 'cfg.php';
+        global $rulesDatabase;
 		$this->dbh = new PDO($rulesDatabase['dsn'], $rulesDatabase['username'], $rulesDatabase['password']);
         $this->labadmin_groupOptions = $this->getLabAdminGroups();
 	}

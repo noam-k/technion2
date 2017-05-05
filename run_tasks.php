@@ -1,6 +1,6 @@
 <?php
 
-include_once 'model/rules.php';
+/*include_once 'model/rules.php';
 include_once 'model/labAdmin.php';
 include_once 'controller/ics.php';
 include_once 'externalLibraries/PHPMailer/PHPMailerAutoload.php';
@@ -95,4 +95,9 @@ foreach ($rules->getRulesData(RulesModel::TABLE_RULES_FLEXIBLE, $admin) as $deta
 }
 
 echo 'Total of '.$emailsCount.' emails have been sent <br>', PHP_EOL;
-error_log('Script finished. Total of '.$sumMails.' sent. Time: '.date('Y-m-d H:i:s').PHP_EOL, 3, $logFile);
+error_log('Script finished. Total of '.$sumMails.' sent. Time: '.date('Y-m-d H:i:s').PHP_EOL, 3, $logFile);*/
+
+include 'controller/taskRunner.php';
+
+$taskRunnes = new labAdminTaskRunner();
+$taskRunnes->invoke();
