@@ -58,7 +58,7 @@ class LabAdminModel{
     /**
     * @return array
     */
-    protected function getLabAdminGroups() {
+    public function getLabAdminGroups() {
         # TODO: write this function such that it returns the different groups, e.g array()
         return array(1 => 'Admins', 14 => 'Supervisors', 15 => 'Assistents', 200 => 'Students'); # Temporary
     }

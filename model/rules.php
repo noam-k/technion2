@@ -1,6 +1,7 @@
 <?php
 
 require_once 'cfg.php';
+require_once 'labAdmin.php';
 
 class RulesModel {
 
@@ -49,16 +50,9 @@ class RulesModel {
     public function __construct() {
         global $rulesDatabase;
 		$this->dbh = new PDO($rulesDatabase['dsn'], $rulesDatabase['username'], $rulesDatabase['password']);
-        $this->labadmin_groupOptions = $this->getLabAdminGroups();
+        $labAdmin = new LabAdminModel();
+        $this->labadmin_groupOptions = $labAdmin->getLabAdminGroups();
 	}
-
-    /**
-    * @return array
-    */
-    protected function getLabAdminGroups() {
-        # TODO: write this function such that it returns the different groups, e.g array()
-        return array(1 => 'Admins', 14 => 'Supervisors', 15 => 'Assistents', 200 => 'Students'); # Temporary
-    }
 
 	public function getStudents() {
 		$ret = array();
