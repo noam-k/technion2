@@ -97,11 +97,12 @@ class labAdminTaskRunner {
         if(!empty($event)) {
             $mail->Ical = $this->makeIcs(unserialize($event));
         }
-        foreach ($this->createEmailList($sendTo) as $email) {
+        $emails = $this->createEmailList($sendTo);
+        foreach ($emails as $email) {
             $mail->addAddress($email);
             error_log("Email address added: $email".PHP_EOL, 3, $this->logFile);
         }
-        echo '<div style="font-size:big;color:red">Debug: DONE</div>'; die;
+        echo '<div style="font-size:big;color:red">Debug: DONE</div>'; return 1;
         if ($mail->send()) {
             $sumMails+= count($emails);
             error_log("Send successfull".PHP_EOL, 3, $this->logFile);
@@ -138,22 +139,23 @@ class labAdminTaskRunner {
 
         echo 'Flexible Rules: <br/>';
         foreach ($this->rules->getRulesData(RulesModel::TABLE_RULES_FLEXIBLE, $this->admin) as $details) {
+            #var_dump($details); die;
             echo 'Handling rule #' .$details['id'].'<br>';
             error_log('Handling rule #'.$details['id'].PHP_EOL, 3, $this->logFile);
             if ($details['formula'] !== 'set') {
-                $resultNumber = $this->labadmin->getCountSelect($details['sqlqeury']);
+                $resultNumber = $this->labadmin->getCountSelect($details['sqlquery']);
                 $formula = str_replace(self::RES_NUM, $resultNumber, $details['formula']);
                 if (eval($formula)) { # The condition set by the user is fulfilled
-                    $emailsCount = $this->labAdminAlert($details['sendto'], $details['event'], $details['message']);
+                    $sumMails = $this->labAdminAlert($details['sendto'], $details['event'], $details['message']);
                 }
             } else {
-                foreach ($this->labadmin->getSelectSet($details['sqlqeury']) as $row) {
-                    $emailsCount = $this->labAdminAlert($details['sendto'], $details['event'], $details['message']); # TODO: add placeholders
+                foreach ($this->labadmin->getSelectSet($details['sqlquery']) as $row) {
+                    $sumMails = $this->labAdminAlert($details['sendto'], $details['event'], $details['message']); # TODO: add placeholders
                 }
             }
         }
 
-        echo 'Total of '.$emailsCount.' emails have been sent <br>';
+        echo 'Total of '.$sumMails.' emails have been sent <br>';
         error_log('Script finished. Total of '.$sumMails.' sent. Time: '.date('Y-m-d H:i:s').PHP_EOL, 3, $this->logFile);
     }
 }
