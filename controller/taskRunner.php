@@ -50,10 +50,25 @@ class labAdminTaskRunner {
         } elseif (is_int($rawData) || ctype_digit($rawData)) { # LabAdmin Group
             return $this->labAdmin->getGroupEmails(intval($rawData));
         } elseif (preg_match('/^.?+select+/i', $rawData)) {  # SQL query that starts in a select
-            return $this->labadmin->getQueryResults($rawData);
+            return $this->labadmin->getSelectSet($rawData);
         }
         error_log('Error while parsing "sendto" field'. PHP_EOL, 3, $this->logFile);
         return array();
+    }
+
+    /**
+    * @var $event array
+    * @return string
+    */
+    protected function makeIcs($event = array()) {
+        $ics = new ics();
+        $ics->setSummary($event['summary']);
+        $ics->setOrganizerMail($event['organizer_mail']);
+        $ics->setDescription($event['event_description']);
+        $ics->setStartTime($event['begin_date']);
+        $ics->setEndTime($event['end_date']);
+        $ics->setLocation($event['location']);
+        return $ics->generate();
     }
 
     /**
@@ -84,9 +99,9 @@ class labAdminTaskRunner {
         }
         foreach ($this->createEmailList($sendTo) as $email) {
             $mail->addAddress($email);
-            error_log("Email address added: $email", 3, $this->logFile);
+            error_log("Email address added: $email".PHP_EOL, 3, $this->logFile);
         }
-        echo '<div style="font-size:big;color:red">DONE</div>'; die;
+        echo '<div style="font-size:big;color:red">Debug: DONE</div>'; die;
         if ($mail->send()) {
             $sumMails+= count($emails);
             error_log("Send successfull".PHP_EOL, 3, $this->logFile);
@@ -98,27 +113,33 @@ class labAdminTaskRunner {
 
     public function __construct() {
         $this->rules = new RulesModel;
-        $this->ladadmin = new LabAdminModel();
+        $this->labadmin = new LabAdminModel();
         $this->admin = $this->isAdmin();
     }
 
     public function invoke() {
         echo '<pre>';
-        echo 'Starting script...<br/>'.PHP_EOL;
+        echo 'Starting script...<br/>';
         error_log('Starting script. Time: '.date('Y-m-d H:i:s').PHP_EOL, 3, $this->logFile);
         $sumMails = 0;
-        echo 'Basic Rules: <br/>'.PHP_EOL;
+        /*TODO: if basic rules are to be included:
+            1. Uncomment following lines
+            2. For each $recipients, check if they already recieved a mail (make a table in rules DB)
+                2.1. if not, send a mail
+        */
+        /*echo 'Basic Rules: <br/>';
         foreach ($this->rules->getRulesData(RulesModel::TABLE_RULES_BASIC, $this->admin) as $details) {
-            break; # TODO: handle
-            echo 'Handling basic rule #' .$details['id'].'<br>', PHP_EOL;
+            echo 'Handling basic rule #' .$details['id'].'<br>';
+            error_log('Handling basic rule #' .$details['id']. PHP_EOL, 3, $this->logFile);
+            $recipients = $this->labadmin->getGroupEmails($details['recipients']);
             print_r($details); continue;
         }
+        die;*/
 
         echo 'Flexible Rules: <br/>';
         foreach ($this->rules->getRulesData(RulesModel::TABLE_RULES_FLEXIBLE, $this->admin) as $details) {
-            echo 'Handling rule #' .$details['id'].'<br>', PHP_EOL;
+            echo 'Handling rule #' .$details['id'].'<br>';
             error_log('Handling rule #'.$details['id'].PHP_EOL, 3, $this->logFile);
-            #print_r($details); continue;
             if ($details['formula'] !== 'set') {
                 $resultNumber = $this->labadmin->getCountSelect($details['sqlqeury']);
                 $formula = str_replace(self::RES_NUM, $resultNumber, $details['formula']);
@@ -132,7 +153,7 @@ class labAdminTaskRunner {
             }
         }
 
-        echo 'Total of '.$emailsCount.' emails have been sent <br>', PHP_EOL;
+        echo 'Total of '.$emailsCount.' emails have been sent <br>';
         error_log('Script finished. Total of '.$sumMails.' sent. Time: '.date('Y-m-d H:i:s').PHP_EOL, 3, $this->logFile);
     }
 }

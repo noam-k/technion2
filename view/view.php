@@ -143,6 +143,7 @@ class RulesView {
             var elem = document.getElementsByName(prop)[0];
             elem.parentNode.parentNode.style.display = "none";
             elem.disabled = true;
+            elem.value = "";
             elem.required = false;
         }
         function enable(prop) {
