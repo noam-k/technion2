@@ -158,7 +158,7 @@ class RulesView {
                 elem.parentNode.parentNode.style.display = "none";
             }
             disableAsDefault("formula");
-            disableAsDefault("email_address");
+            disableAsDefault("email_addresses");
             disableAsDefault("labadmin_group");
             disableAsDefault("SQL_defined_group");
             disableAsDefault("begin_date");
@@ -176,17 +176,17 @@ class RulesView {
                 disable("formula");
             }
             document.getElementsByName("send_mail_to")[0].onclick = function(){
-                enable("email_address");
+                enable("email_addresses");
                 disable("labadmin_group");
                 disable("SQL_defined_group");
             }
             document.getElementsByName("send_mail_to")[1].onclick = function(){
-                disable("email_address");
+                disable("email_addresses");
                 enable("labadmin_group");
                 disable("SQL_defined_group");
             }
             document.getElementsByName("send_mail_to")[2].onclick = function(){
-                disable("email_address");
+                disable("email_addresses");
                 disable("labadmin_group");
                 enable("SQL_defined_group");
             }

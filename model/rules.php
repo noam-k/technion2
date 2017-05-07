@@ -40,7 +40,7 @@ class RulesModel {
     /**
     * @var array
     */
-    protected $send_mail_toOptions = array('One address', 'LabAdmin group', 'SQL defined group');
+    protected $send_mail_toOptions = array('Comma separated list', 'LabAdmin group', 'SQL defined group');
 
     /**
     * @var array
@@ -159,7 +159,7 @@ class RulesModel {
                 'options' => $this->send_mail_toOptions,
                 'properties' => array('required' => 1),
             ),
-            'email_address' => array(
+            'email_addresses' => array(
                 'type' => 'textbox',
                 'properties' => array('disabled' => 1), # enable on send_mail_to = address
                 'validation' => self::EMAIL,
