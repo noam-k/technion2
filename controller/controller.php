@@ -111,9 +111,9 @@ class RulesController {
             $_POST['formula'] = 'set';
             unset($_POST['condition_or_set']);
         }
-        if ($_POST['send_mail_to'] === 'One address') {
-            $_POST['sendto'] = $_POST['email_address'];
-            unset($_POST['email_address']);
+        if ($_POST['send_mail_to'] === 'Comma separated list') {
+            $_POST['sendto'] = $_POST['email_addresses'];
+            unset($_POST['email_addresses']);
         } elseif ($_POST['send_mail_to'] === 'LabAdmin group') {
             $_POST['sendto'] = $_POST['labadmin_group'];
             unset($_POST['labadmin_group']);
