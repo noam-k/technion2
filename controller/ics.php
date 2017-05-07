@@ -11,6 +11,12 @@ class ics{
     protected $timeFormat = 'Ymd\THis\Z';
 
     /**
+    * (yyyy-mm-dd hh:ii:ss)
+    * @var string
+    */
+    protected $timeRegex = '/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/';
+
+    /**
     * @var string
     */
     protected $startTime;
@@ -101,17 +107,25 @@ END:VCALENDAR';
     }
 
     /**
-    * @var time DateTime
+    * @var time DateTime|string
     */
     public function setStartTime($time) {
-        $this->startTime = $time->format($this->timeFormat);
+        if (is_string($time) && preg_match($this->timeRegex, $time)) {
+            $this->startTime = $time;
+        } else {
+            $this->startTime = $time->format($this->timeFormat);
+        }
     }
 
     /**
-    * @var time DateTime
+    * @var time DateTime|string
     */
     public function setEndTime($time) {
-        $this->endTime = $time->format($this->timeFormat);
+        if (is_string($time) && preg_match($this->timeRegex, $time)) {
+            $this->endTime = $time;
+        } else {
+            $this->endTime = $time->format($this->timeFormat);
+        }
     }
 
     /**

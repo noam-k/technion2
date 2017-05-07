@@ -31,14 +31,12 @@ class LabAdminModel{
     * @return array
     */
     public function getSelectSet($query) {
-        $ret = array();
         $sth = $this->dbh->prepare($query);
-        $sth->execute();
-        $result = $sth->fetchAll(PDO::FETCH_ASSOC);
-        foreach ($result as $value) {
-            $ret[] = $value;
+        if (!$sth->execute()) {
+            throw new Exception($sth->errorInfo()[2]);
+        } else {
+            return $sth->fetchAll(PDO::FETCH_ASSOC);
         }
-        return $ret;
     }
 
     /**
@@ -71,12 +69,14 @@ class LabAdminModel{
     public function getCountSelect($query) {
         $query = trim($query);
         if (strcasecmp(substr($query, 0, 5), 'count')) { # equals zero iff $query begins with 'count'
-            $query = 'count (*) from ('.$query.')';
+            $query = 'SELECT COUNT(*) as number FROM ('.$query.') as tempTable';
         }
         $sth = $this->dbh->prepare($query);
         $sth->execute();
-        $result = $sth->fetchAll(PDO::FETCH_BOTH);
-        return $result[0];
+        if (!$sth->execute()) {
+            throw new Exception($sth->errorInfo()[2]);
+        }
+        $result = $sth->fetchAll(PDO::FETCH_ASSOC);
+        return intval($result[0]['number']);
     }
-
 }

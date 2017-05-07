@@ -54,14 +54,6 @@ class RulesModel {
         $this->labadmin_groupOptions = $labAdmin->getLabAdminGroups();
 	}
 
-	public function getStudents() {
-		$ret = array();
-		foreach ($this->dbh->query('SELECT * FROM students') as $value) {
-			$ret[] = $value;
-		}
-		return $ret;
-	}
-
     /**
     * @return array a list of the fields saved for each rule and are PHP relevant
     */

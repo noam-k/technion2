@@ -75,6 +75,7 @@ class labAdminTaskRunner {
     * @var $mail PHPMailer
     */
     protected function configureSMTP($mail) {
+        global $smtpConf;
         $mail->Host = $smtpConf['hostname'];
         $mail->Username = $smtpConf['username'];
         $mail->Password = $smtpConf['password'];
@@ -92,17 +93,28 @@ class labAdminTaskRunner {
     protected function labAdminAlert($sendTo, $event = null, $message = null) {
         $mail = new PHPMailer();
         $this->configureSMTP($mail);
-        $mail->setFrom(srlf::EMAIL_SENDER);
+        $mail->setFrom(self::EMAIL_SENDER);
+        foreach ($this->currentSetEntry as $field => $value) {
+            $message = str_replace('{'.$field.'}',$value,$message);
+        }
         $mail->Body = $message;
         if(!empty($event)) {
-            $mail->Ical = $this->makeIcs(unserialize($event));
+            $eventArray = unserialize($event);
+            foreach ($eventArray as $key => $value) {
+                if (preg_match('/\{(.*)\}/', $value, $matches)) {
+                    $field = $matches[1];
+                    $placeHolder = $matches[0];
+                    $eventArray[$key] = str_replace($placeHolder, $this->currentSetEntry[$field], $value);
+                }
+            }
+            $mail->Ical = $this->makeIcs($eventArray);
         }
         $emails = $this->createEmailList($sendTo);
         foreach ($emails as $email) {
             $mail->addAddress($email);
             error_log("Email address added: $email".PHP_EOL, 3, $this->logFile);
         }
-        echo '<div style="font-size:big;color:red">Debug: DONE</div>'; return 1;
+        echo '<div style="font-size:big;color:red">Debug: DONE</div>'; return count($emails);
         if ($mail->send()) {
             $sumMails+= count($emails);
             error_log("Send successfull".PHP_EOL, 3, $this->logFile);
@@ -139,23 +151,28 @@ class labAdminTaskRunner {
 
         echo 'Flexible Rules: <br/>';
         foreach ($this->rules->getRulesData(RulesModel::TABLE_RULES_FLEXIBLE, $this->admin) as $details) {
-            #var_dump($details); die;
-            echo 'Handling rule #' .$details['id'].'<br>';
-            error_log('Handling rule #'.$details['id'].PHP_EOL, 3, $this->logFile);
-            if ($details['formula'] !== 'set') {
-                $resultNumber = $this->labadmin->getCountSelect($details['sqlquery']);
-                $formula = str_replace(self::RES_NUM, $resultNumber, $details['formula']);
-                if (eval($formula)) { # The condition set by the user is fulfilled
-                    $sumMails = $this->labAdminAlert($details['sendto'], $details['event'], $details['message']);
+            try {
+                echo 'Handling rule #' .$details['id'].'<br>';
+                error_log('Handling rule #'.$details['id'].PHP_EOL, 3, $this->logFile);
+                if ($details['formula'] !== 'set') {
+                    $resultNumber = $this->labadmin->getCountSelect($details['sqlquery']);
+                    $formula = 'return '.str_replace(self::RES_NUM, $resultNumber, $details['formula']) .';';
+                    if (eval($formula)) { # The condition set by the user is fulfilled
+                        $sumMails += $this->labAdminAlert($details['sendto'], $details['event'], $details['message']);
+                    }
+                } else {
+                    foreach ($this->labadmin->getSelectSet($details['sqlquery']) as $row) {
+                        $this->currentSetEntry = $row;
+                        $sumMails += $this->labAdminAlert($details['sendto'], $details['event'], $details['message']); # TODO: add placeholders
+                    }
                 }
-            } else {
-                foreach ($this->labadmin->getSelectSet($details['sqlquery']) as $row) {
-                    $sumMails = $this->labAdminAlert($details['sendto'], $details['event'], $details['message']); # TODO: add placeholders
-                }
+            } catch (Exception $e) {
+                echo 'Failed to execute rule #' .$details['id'].': '.$e->getMessage().'<br>';
+                error_log('Error: Rule #'.$details['id'].' failed: '.$e->getMessage().PHP_EOL, 3, $this->logFile);
             }
         }
 
         echo 'Total of '.$sumMails.' emails have been sent <br>';
-        error_log('Script finished. Total of '.$sumMails.' sent. Time: '.date('Y-m-d H:i:s').PHP_EOL, 3, $this->logFile);
+        error_log('Script finished. Total of '.$sumMails.' emails sent. Time: '.date('Y-m-d H:i:s').PHP_EOL, 3, $this->logFile);
     }
 }
