@@ -18,7 +18,6 @@ foreach ($notAllowedSQLFunctions as $word) {
 $labAdmin = new LabAdminModel();
 try {
     $result = $labAdmin->getSelectSet($query);
-    #print_r($result); die;
     $body = '';
     foreach ($result as $row) {
         $head = '<tr><th>'.implode('</th><th>', array_keys($row)).'</th></tr>';

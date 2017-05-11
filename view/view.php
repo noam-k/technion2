@@ -97,6 +97,12 @@ class RulesView {
     */
     protected $deleteLink = '<a href="%s?deleteRule=%s&table=%s"><img src="img/icon_del.gif"/></a>';
 
+    /**
+    * Simply works with template.html to show pages in a conformal way
+    * @var $title string
+    * @var $header string
+    * @var $content string
+    */
     protected function renderPage($title, $header, $content) {
         $header = '<h1>'.$header.'</h1>';
         if ($this->announcement != '') {
@@ -112,10 +118,20 @@ class RulesView {
         echo $template;
     }
 
+    /**
+    * Wrap a message in a div to be "announced" (currently show in red for a few seconds)
+    * @var $announcement string
+    * @return string
+    */
     protected function announce($announcement) {
         return '<div id="announcement">'.$announcement.'</div>';
     }
 
+    /**
+    * Wrap a message in a div to serve as instructions
+    * @var $announcement string
+    * @return string
+    */
     protected function explain($explaination) {
         $explainationButton = '<a id="explainationLink" href="javascript:void(0)"
         onClick="toggleDiv(\'explainationContent\', \'show_button\');">
@@ -123,20 +139,32 @@ class RulesView {
         return '<div id="explaination">'.$explainationButton.'<div id="explainationContent">'.$explaination.'</div></div>';
     }
 
+    /**
+    * @return string an event icon / hover details
+    */
     public function getEventHTML() {
         $src = $this->eventImg;
         return "<a><img src=$src> (show event details)</a><div class='hiddenText'>%s</div>";
     }
 
+    /**
+    * @return string a message icon / hover details
+    */
     public function getMessageHTML() {
         $src = $this->messageImg;
         return "<a><img src=$src> (show message)</a><div class='hiddenText'>%s</div>";
     }
 
+    /**
+    * @return string a rule delete link
+    */
     public function getDeleteLinkTemplate() {
         return sprintf($this->deleteLink, $_SERVER['PHP_SELF'], '%s', '%s');
     }
 
+    /**
+    * @return string javascript functions (in a script tag)
+    */
     protected function setFlexibleRulesEvents() {
         return '<script>
         function disable(prop) {
@@ -218,6 +246,12 @@ class RulesView {
     </script>';
     }
 
+    /**
+    * @var $file string a php file name to execute as an ajax call
+    * @var $querySource an element from which to read the request
+    * @var $lable button lable
+    * @return string an ajax button + previewer
+    */
     protected function ajaxPreview($file, $querySource, $lable) {
         $previewDiv = $querySource.'_preview';
         $button = '<button class="ajaxCall" onClick="ajaxGetSQLSelect('.$querySource.',\''.$previewDiv.'\'); return false;">'.$lable.'</button>';
@@ -225,13 +259,19 @@ class RulesView {
         return $button.$preview;
     }
 
+    /**
+    * @return string HTML element - warn users about the invalidity of basic rules
+    */
     protected function warnBasicRules() {
         return '<p style="color:red; text-decoration: underline;">
          NOTE: Basic rules page is merley for demonstration purposes.<br/>
          The rules generated in this page will have no affect</p>';
     }
     /**
-    * @param $data array
+    * @var $data array
+    * @var $newRuleAdded bool
+    * @var $explaination string
+    * @var $flexible bool
     * prints a page with the content of "new page to add"
     */
     public function renderAddNewRulePage($data = array(), $newRuleAdded = false, $explaination = '', $flexible = false) {
@@ -272,17 +312,6 @@ class RulesView {
         $this->renderPage(self::PAGE_NEW_RULE_TITLE, self::PAGE_NEW_RULE_HEADER, $content);
     }
 
-/*
-    public function renderAddNewFlexibleRulePage($data = array(), $newRuleAdded = false) {
-        echo 'HELLO'; die;
-        $this->explaination = self::INSTRUCTIONS_NEW_FLEXIBLE_RULE;
-        $form = new Form('myForm');
-        $form->configure(array("prevent" => array("bootstrap")));
-        $content = '';
-        $this->renderPage(self::PAGE_NEW_RULE_TITLE, self::PAGE_NEW_RULE_HEADER, $content);
-    }
-*/
-
     /**
     * @var $headers array
     * @var $rules array
@@ -318,6 +347,9 @@ class RulesView {
         $this->renderPage(self::PAGE_EXISTING_RULES_TITLE, self::PAGE_EXISTING_RULES_HEADER, $returnValue);
     }
 
+    /**
+    * just prints the welcome page
+    */
     public function renderWelcomePage(){
         $content = sprintf(self::WELCOME_CONTENT, $this->projectBookLink, $this->creatorMailLink);
         $this->renderPage(self::PAGE_WELCOME_TITLE, self::PAGE_WELCOME_HEADER, $content);
