@@ -225,6 +225,11 @@ class RulesView {
         return $button.$preview;
     }
 
+    protected function warnBasicRules() {
+        return '<p style="color:red; text-decoration: underline;">
+         NOTE: Basic rules page is merley for demonstration purposes.<br/>
+         The rules generated in this page will have no affect</p>';
+    }
     /**
     * @param $data array
     * prints a page with the content of "new page to add"
@@ -234,6 +239,8 @@ class RulesView {
         $content = '';
         if ($flexible) {
             $content .= $this->setFlexibleRulesEvents();
+        } else {
+            $content .= $this->warnBasicRules();
         }
         if ($newRuleAdded) {
             $this->announcement = 'New rule added successfully';
@@ -244,12 +251,12 @@ class RulesView {
         foreach ($data as $name => $details) {
             $elementType = 'Element_'.ucfirst($details['type']);
             $lable = ucfirst(strtolower(str_replace('_', ' ', $name)));
+            if (!isset($details['properties'])) {
+                $details['properties'] = null;
+            }
             if (!empty($details['options'])) {
                 if ($elementType === 'Element_Select') {
                     $details['options'] = array('' => '(select)') + $details['options'];
-                }
-                if (!isset($details['properties'])) {
-                    $details['properties'] = null;
                 }
                 $form->addElement(new $elementType($lable.':', $name, $details['options'], $details['properties']));
             } else {

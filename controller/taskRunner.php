@@ -88,15 +88,17 @@ class labAdminTaskRunner {
     * @var $sendTo string
     * @var $event array|null
     * @var $message string|null
+    * @var $title string|null
     * @var return int number of emails sent
     */
-    protected function labAdminAlert($sendTo, $event = null, $message = null) {
+    protected function labAdminAlert($sendTo, $event = null, $message = null, $title = null) {
         $mail = new PHPMailer();
         $this->configureSMTP($mail);
         $mail->setFrom(self::EMAIL_SENDER);
         foreach ($this->currentSetEntry as $field => $value) {
             $message = str_replace('{'.$field.'}',$value,$message);
         }
+        $mail->Subject = $title;
         $mail->Body = $message;
         if(!empty($event)) {
             $eventArray = unserialize($event);
@@ -111,6 +113,9 @@ class labAdminTaskRunner {
         }
         $emails = $this->createEmailList($sendTo);
         foreach ($emails as $email) {
+            foreach ($this->currentSetEntry as $field => $value) {
+                $message = str_replace('{'.$field.'}',$value,$message);
+            }
             $mail->addAddress($email);
             error_log("Email address added: $email".PHP_EOL, 3, $this->logFile);
         }
@@ -158,12 +163,12 @@ class labAdminTaskRunner {
                     $resultNumber = $this->labadmin->getCountSelect($details['sqlquery']);
                     $formula = 'return '.str_replace(self::RES_NUM, $resultNumber, $details['formula']) .';';
                     if (eval($formula)) { # The condition set by the user is fulfilled
-                        $sumMails += $this->labAdminAlert($details['sendto'], $details['event'], $details['message']);
+                        $sumMails += $this->labAdminAlert($details['sendto'], $details['event'], $details['message'], $details['title']);
                     }
                 } else {
                     foreach ($this->labadmin->getSelectSet($details['sqlquery']) as $row) {
                         $this->currentSetEntry = $row;
-                        $sumMails += $this->labAdminAlert($details['sendto'], $details['event'], $details['message']); # TODO: add placeholders
+                        $sumMails += $this->labAdminAlert($details['sendto'], $details['event'], $details['message'], $details['title']);
                     }
                 }
             } catch (Exception $e) {

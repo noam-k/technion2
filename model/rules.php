@@ -45,7 +45,7 @@ class RulesModel {
     /**
     * @var array
     */
-    protected $flexibleRulesFields = array('description', 'sqlquery', 'formula', 'sendto', 'event', 'message');
+    protected $flexibleRulesFields = array('description', 'sqlquery', 'formula', 'sendto', 'event', 'message', 'title');
 
     public function __construct() {
         global $rulesDatabase;
@@ -211,6 +211,9 @@ class RulesModel {
                 'type' => 'textarea',
                 'properties' => array('disabled' => 1)
             ),
+            'title' => array(
+                'type' => 'textbox',
+            )
         );
     }
 
