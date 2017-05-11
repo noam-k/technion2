@@ -140,6 +140,7 @@ class RulesModel {
                 'type' => 'textarea',
                 'properties' => array('required' => 1, 'longDesc' => 'SQL Query that will serve as the rule\'s base'),
                 'validation' => self::SQL,
+                'ajaxPreview' => array('call' => 'showSelect', 'lable' => 'Preview SQL results'),
             ),
             'condition_or_set' => array(
                 'type' => 'radio',

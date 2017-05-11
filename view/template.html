@@ -165,6 +165,32 @@
 			border: 1px solid;
 			float: none;
 	    }
+		.ajaxCall {
+		    background-color: #899B65;
+		    border: none;
+		    color: white;
+		    padding: 5px 10px;
+		    text-align: center;
+		    text-decoration: none;
+		    display: inline-block;
+		    margin: 4px 2px;
+		    cursor: pointer;
+		    -webkit-transition-duration: 0.4s; /* Safari */
+		    transition-duration: 0.4s;
+		}
+		.ajaxCall:hover {
+			box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24),0 17px 50px 0 rgba(0,0,0,0.19);
+		}
+		.ajaxPreviewDiv {
+			display: none;
+			position: absolute;
+			float: none;
+			background: white;
+			border: solid 1px;
+			z-index: 2;
+			height: 250px;
+			overflow: scroll;
+		}
 	</style>
 	<script>
 		function toggleDiv(name, button){
@@ -182,6 +208,26 @@
 				announce.style.display = "none";
 			}
 		}, 3000);
+	</script>
+	<script>
+		function ajaxGetSQLSelect(elem, previewDiv) {
+			var str = elem.value;
+			var prevDiv = document.getElementById(previewDiv);
+			if (str == "" || prevDiv.innerHTML != '') {
+				prevDiv.style.display = 'none';
+				prevDiv.innerHTML = '';
+			} else {
+				xmlhttp = new XMLHttpRequest();
+				xmlhttp.onreadystatechange = function() {
+					if (this.readyState == 4 && this.status == 200) {
+                		prevDiv.innerHTML = this.responseText;
+					}
+				}
+				xmlhttp.open("GET", "showSelect.php?query="+str, true);
+				xmlhttp.send();
+				prevDiv.style.display = 'block';
+			}
+		};
 	</script>
 </head>
 <body>

@@ -218,6 +218,13 @@ class RulesView {
     </script>';
     }
 
+    protected function ajaxPreview($file, $querySource, $lable) {
+        $previewDiv = $querySource.'_preview';
+        $button = '<button class="ajaxCall" onClick="ajaxGetSQLSelect('.$querySource.',\''.$previewDiv.'\'); return false;">'.$lable.'</button>';
+        $preview = '<div id="'.$previewDiv.'" class="ajaxPreviewDiv"></div>';
+        return $button.$preview;
+    }
+
     /**
     * @param $data array
     * prints a page with the content of "new page to add"
@@ -247,6 +254,10 @@ class RulesView {
                 $form->addElement(new $elementType($lable.':', $name, $details['options'], $details['properties']));
             } else {
                 $form->addElement(new $elementType($lable.':', $name, $details['properties']));
+            }
+            if (isset($details['ajaxPreview']) && is_file($details['ajaxPreview']['call'].'.php')) {
+                $preview = $this->ajaxPreview($details['ajaxPreview']['call'], $name, $details['ajaxPreview']['lable']);
+                $form->addElement(new Element_HTML($preview));
             }
         }
         $form->addElement(new Element_Button);
