@@ -27,24 +27,24 @@ class RulesView {
 	    <li>Refer to the results as a number</li>
         <ol>
 		     <li>Write a formula</li>
-		     <li>If the <b>number of entries</b> in the result satisfies the formula - continue to the next step</li>
+		     <li>The rule will be executed if the <b>number of entries</b> in the result satisfies the formula</li>
         </ol>
-    <li>Refer to the results as a set of entries. Eexcute the next step for each entry</li>
+    <li>Refer to the results as a set of entries. The rule will be excuted for each row of the result</li>
     </ol>
     <li>Choose who should get an email alert</li>
     <ol>
-        <li>A specific email address</li>
-        <li>A pre-definied group of people (e.g. all LabAdmin users, all instructors of some laboratory etc.)</li>
+        <li>Pre-definied email address(es) - one, or more with comma separation</li>
+        <li>A pre-definied LabAdmin group of people (e.g. all users, all instructors etc.)</li>
         <li>A set of emails that are the result of another SQL Query</li>
     </ol>
     <li>Set an email structure</li>
     <ol>
-        <li>Should an invitation be sent? If yes:</li>
+        <li>Should an event invitation be sent? If yes, add the following:</li>
         <ol>
-            <li>Create a one time invitation</li>
-            <li>Send an invitation that is based on the query\'s result (from clause number 2)</li>
+            <li>start time, end time, location, an email of the organizer, summary and description</li>
         </ol>
 	    <li>Should a massage be added? Placeholders from the query\'s result can be added</li>
+        <li>Email subject</li>
     </ol>
     </ol>';
 
