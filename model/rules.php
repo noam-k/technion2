@@ -61,10 +61,17 @@ class RulesModel {
         return array_keys($this->getNewBasicRuleFormData());
     }
 
+    /**
+    * @return array
+    */
     public function getFlexibleRuleFields() {
         return $this->flexibleRulesFields;
     }
 
+    /**
+    * @var $table string
+    * @return array
+    */
     protected function getFields($table) {
         if ($table === self::TABLE_RULES_BASIC) {
             return $this->getBasicRuleFields();
@@ -97,7 +104,7 @@ class RulesModel {
     }
 
     /**
-    * Configure the "new rule" HTML form elements
+    * Configure the "new basic rule" HTML form elements
     * Structure:
     * 'name_words_separated_with_underscore' => array(
     *   'type' => 'form_type',
@@ -130,6 +137,19 @@ class RulesModel {
         );
     }
 
+    /**
+    * Configure the "new flexible rule" HTML form elements
+    * Structure:
+    * 'name_words_separated_with_underscore' => array(
+    *   'type' => 'form_type',
+    *   'properties' => PFBC properties array,
+    *   'options' => array(), # options, in case this element is a select, radio etc.
+    *   'validation' => validation type, best be one of this class's constants
+    *   'ajaxPreview' => details of ajax call for this element
+    * )
+    * The order the elements are placed here should be the same order to display them
+    * @return array
+    */
     public function getNewFlexibleRuleFormData() {
         return array(
             'description' => array(
@@ -240,7 +260,7 @@ class RulesModel {
 
     /**
     * Adds a flexible rule to the database, performing an SQL injection security check beforehand. Data is in $_POST.
-    * @return bool on success
+    * @return bool
     */
     public function addNewFlexibleRule() {
         $fields = $this->flexibleRulesFields;

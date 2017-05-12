@@ -49,7 +49,7 @@ class RulesController {
     * (e.g. 0, empty string etc.). By explicitly comparing it to "false" we return the expected result
     * @var $value mixed
     * @var $validationType int defined in RulesModel
-    * @return book
+    * @return bool
     */
     protected function validate($value, $validationType) {
         switch ($validationType) {
@@ -83,10 +83,7 @@ class RulesController {
             if (!empty($details['properties']['required']) == RulesModel::REQUIRED && !isset($_POST[$fieldName])) {
                 throw new Exception("Error: required field wasn't found: ".$fieldName, self::REQUIRED_FIELD_NOT_FOUND);
             }
-            /*if ($properties['severity'] == RulesModel::REQUIRED && empty($_POST[$fieldName])) {
-                throw new Exception("Error: required field wasn't found: ".$fieldName, self::REQUIRED_FIELD_NOT_FOUND);
-            }
-            if (!empty($properties['validation']) && !$properties['validation']($_POST[$fieldName])) {
+            /*if (!empty($properties['validation']) && !$properties['validation']($_POST[$fieldName])) {
                 throw new Exception("Error: failed to process data: ".$fieldName, self::FIELD_VALIDATION_FAILED);
             }*/
         }
@@ -189,6 +186,7 @@ class RulesController {
 
     /**
     * @var $id int
+    * @var $table string
     */
     public function deleteRule($id, $table) {
         if ($this->model->deleteRule($id, $table)) {

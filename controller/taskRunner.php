@@ -89,7 +89,7 @@ class labAdminTaskRunner {
     * @var $event array|null
     * @var $message string|null
     * @var $title string|null
-    * @var return int number of emails sent
+    * @return int number of emails sent
     */
     protected function labAdminAlert($sendTo, $event = null, $message = null, $title = null) {
         $mail = new PHPMailer();

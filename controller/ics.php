@@ -77,7 +77,8 @@ END:VEVENT
 END:VCALENDAR';
 
     /**
-    * @var email string
+    * @var $email string
+    * @var $name string
     * ׂׂ@return bool
     */
     public function setOrganizerMail($email, $name ='') {
@@ -92,7 +93,7 @@ END:VCALENDAR';
     }
 
     /**
-    * @var value string
+    * @var $value string
     */
     public function setSummary($value) {
         $this->summary = $value;
@@ -100,14 +101,14 @@ END:VCALENDAR';
     }
 
     /**
-    * @var value string
+    * @var $value string
     */
     public function setDescription($value=''){
         $this->description = $value;
     }
 
     /**
-    * @var time DateTime|string
+    * @var $time DateTime|string
     */
     public function setStartTime($time) {
         if (is_string($time) && preg_match($this->timeRegex, $time)) {
@@ -118,7 +119,7 @@ END:VCALENDAR';
     }
 
     /**
-    * @var time DateTime|string
+    * @var $time DateTime|string
     */
     public function setEndTime($time) {
         if (is_string($time) && preg_match($this->timeRegex, $time)) {
@@ -129,7 +130,7 @@ END:VCALENDAR';
     }
 
     /**
-    * @var location string
+    * @var $location string
     */
     public function setLocation($location) {
         $this->location= $location;
