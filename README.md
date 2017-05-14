@@ -2,7 +2,7 @@
 
 ## Synopsis
 
-This system aim to send alerts to LabAdmin related emails, according to rules set by the user
+This system aim to send alerts to [LabAdmin](https://labadmin.ef.technion.ac.il/) related emails, according to rules set by the user
 
 ## Example
 
@@ -18,14 +18,19 @@ Inner SQL query fetches all student id numbers from the table "project", that ha
 The whole query fetches the e-mail addresses of these students.
 
 >**Condition or set:** set
+
 >**Send mail to:** comma separated list
+
 >**Email addresses:** {email_address}
 
 Note the placeholder syntax - the word "email_address" is one (the only) returned value of the SQL query, so when running the rule, it will send it to the returned value of the query.
 
 >**Attach event:** [ ]
+
 >**Attach message:** [x]
+
 >**Message to attach:** Don't forget to come to the lecture in a week from today.
+
 >**Title:** invitation
 
 After a rule has been added, use a task scheduler to run it. E.g. in crontab:
@@ -35,7 +40,60 @@ After a rule has been added, use a task scheduler to run it. E.g. in crontab:
 ```
 ## Description of the different modules
 
+There was a use of the [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller) architecture in this project.
+
+#### Model
+
+There are 2 model files. LabAdmin model and Rules model.
+
+1. LabAdmin model is a connection to the LabAdmin database. This connection is read-only. Since the purpose of the system is to perform actions regarding the LabAdmin data, but not to change them, the connection will be set to read-only from the LabAdmin side.
+
+2. Rules model - the connection to the internal system database. Using this model we will save the rules that we can later execute.
+
+#### View
+
+The view is in charge of displaying the web pages to the user. The main pages are:
+
+1. newFleibleRule.php
+2. rulesList.php
+
+#### Controller
+
+The controller runs "behind the curtains" to validate the data, controlling what should be shown and when, and passing data from the model to the viewer and vice versa.
+
 ## Configuration instructions
+
+#### Prerequisites
+
+1. [PHP](http://php.net/manual/en/install.php)
+2. SQL ([MySQL](https://dev.mysql.com/downloads/installer/) recommended)
+3. An SMTP service provider
+
+#### Changes
+1. Add / Edit a configuration file: cfg.php under the root directory, with all of the settings in this example:
+```
+<?php
+
+$smtpConf = array(
+    'username' => 'username',
+    'password' => 'password',
+    'hostname' => 'hostname',
+    'port' => 2525, # Depends on your SMTP service provider
+    'authentication' => true, # here too
+);
+
+$rulesDatabase = array(
+    'username' => 'root',
+    'password' => 'root',
+    'dsn' => 'mysql:host=localhost;dbname=rules',
+);
+
+$labAdminDatabase = array(
+    'username' => 'root',
+    'password' => 'root',
+    'dsn' => 'mysql:host=labadmin;dbname=database',
+);
+```
 
 ## People
 
