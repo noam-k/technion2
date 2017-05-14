@@ -94,7 +94,18 @@ $labAdminDatabase = array(
     'dsn' => 'mysql:host=labadmin;dbname=database',
 );
 ```
+It's possible that some model variables will need to be changed.
 
 ## People
 
+Project owner:
+Noam Kritneberg
+
+Academic advisor:
+Hovav Gazit
+
+Special thanks:
+Roy Mitrany
+
 ## Contact info
+[Noam Kritenberg](mailto:noam.kritenberg@gmail.com)
