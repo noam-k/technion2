@@ -95,8 +95,10 @@ class labAdminTaskRunner {
         $mail = new PHPMailer();
         $this->configureSMTP($mail);
         $mail->setFrom(self::EMAIL_SENDER);
-        foreach ($this->currentSetEntry as $field => $value) {
-            $message = str_replace('{'.$field.'}',$value,$message);
+        if (!empty($this->currentSetEntry)) {
+            foreach ($this->currentSetEntry as $field => $value) {
+                $message = str_replace('{'.$field.'}',$value,$message);
+            }
         }
         $mail->Subject = $title;
         $mail->Body = $message;
@@ -112,21 +114,24 @@ class labAdminTaskRunner {
             $mail->Ical = $this->makeIcs($eventArray);
         }
         $emails = $this->createEmailList($sendTo);
-        foreach ($emails as $email) {
-            foreach ($this->currentSetEntry as $field => $value) {
-                $message = str_replace('{'.$field.'}',$value,$message);
+        if (!empty($this->currentSetEntry)) {
+            foreach ($emails as $email) {
+                foreach ($this->currentSetEntry as $field => $value) {
+                    $message = str_replace('{'.$field.'}',$value,$message);
+                }
+                $mail->addAddress($email);
+                error_log("Email address added: $email".PHP_EOL, 3, $this->logFile);
             }
-            $mail->addAddress($email);
-            error_log("Email address added: $email".PHP_EOL, 3, $this->logFile);
         }
-        echo '<div style="font-size:big;color:red">Debug: DONE</div>'; return count($emails);
+        #echo '<div style="font-size:big;color:red">Debug: DONE</div>'; return count($emails);
         if ($mail->send()) {
-            $sumMails+= count($emails);
+            $sumMails = count($emails);
             error_log("Send successfull".PHP_EOL, 3, $this->logFile);
+            return $sumMails;
         } else {
             error_log("Send fail:".$mail->ErrorInfo.PHP_EOL, 3, $this->logFile);
         }
-        return $sumMails;
+        return 0;
     }
 
     public function __construct() {
