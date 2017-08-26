@@ -3,10 +3,12 @@
 require_once 'model/labAdmin.php';
 $query = $_GET['query'];
 
+$query = preg_replace('!\s+!', ' ', $query);
+
 $notAllowedSQLFunctions = array('UPDATE', 'INSERT', 'DROP', 'CREATE', 'DELETE', 'MERGE', 'COMMIT', 'ALTER', 'TRUNCATE');
 
 function showError($error) {
-    echo '<font color="red">Disallowed word detected in the query: '.$error.'</div>';
+    echo '<font color="red">Disallowed word detected in the query: '.$error.'</font>';
 }
 
 foreach ($notAllowedSQLFunctions as $word) {
@@ -25,5 +27,5 @@ try {
     }
     echo '<table>'.$head.$body.'</table>';
 } catch (Exception $e) {
-    echo '<font color="red">'.$e->getMessage().'</div>';
+    echo '<font color="red">'.$e->getMessage().'</font>';
 }
