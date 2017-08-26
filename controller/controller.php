@@ -132,6 +132,10 @@ class RulesController {
             unset($_POST['attach_message']);
             unset($_POST['message_to_attach']);
         }
+        if (!empty($_POST['number_of_days_to_scan'])){
+            $_POST['days'] = $_POST['number_of_days_to_scan'];
+            unset($_POST['number_of_days_to_scan']);
+        }
         $this->newRuleAdded = $this->model->addNewFlexibleRule();
     }
 

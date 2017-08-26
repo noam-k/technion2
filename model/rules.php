@@ -45,7 +45,7 @@ class RulesModel {
     /**
     * @var array
     */
-    protected $flexibleRulesFields = array('description', 'sqlquery', 'formula', 'sendto', 'event', 'message', 'title');
+    protected $flexibleRulesFields = array('description', 'sqlquery', 'formula', 'sendto', 'event', 'message', 'title', 'days');
 
     public function __construct() {
         global $rulesDatabase;
@@ -233,7 +233,14 @@ class RulesModel {
             ),
             'title' => array(
                 'type' => 'textbox',
-            )
+            ),
+            'number_of_days_to_scan' => array(
+                'type' => 'number',
+                'properties' => array(
+                    'longDesc' => 'This number determines how many days ahead the rule will scan',
+                    'required' => 1,
+                )
+            ),
         );
     }
 
