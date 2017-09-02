@@ -104,9 +104,9 @@ class RulesController {
         }
         $_POST['sqlquery'] = $_POST['sql_query'];
         unset($_POST['sql_query']);
-        if ($_POST['condition_or_set'] === 'set') {
-            $_POST['formula'] = 'set';
-            unset($_POST['condition_or_set']);
+        if ($_POST['query_handling_method'] === 'set' || $_POST['query_handling_method'] === 'table') {
+            $_POST['formula'] = $_POST['query_handling_method'];
+            unset($_POST['query_handling_method']);
         }
         if ($_POST['send_mail_to'] === 'Comma separated list') {
             $_POST['sendto'] = $_POST['email_addresses'];

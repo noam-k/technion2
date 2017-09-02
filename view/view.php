@@ -197,10 +197,13 @@ class RulesView {
             disableAsDefault("event_description");
             disableAsDefault("message_to_attach");
 
-            document.getElementsByName("condition_or_set")[0].onclick = function(){
+            document.getElementsByName("query_handling_method")[0].onclick = function(){
                 enable("formula");
             }
-            document.getElementsByName("condition_or_set")[1].onclick = function(){
+            document.getElementsByName("query_handling_method")[1].onclick = function(){
+                disable("formula");
+            }
+            document.getElementsByName("query_handling_method")[2].onclick = function() {
                 disable("formula");
             }
             document.getElementsByName("send_mail_to")[0].onclick = function(){

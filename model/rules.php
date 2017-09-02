@@ -30,12 +30,12 @@ class RulesModel {
     /**
     * @var array
     */
-    protected $recipientsOptions = array('assistents', 'students',);
+    protected $recipientsOptions = array('assistents', 'students');
 
     /**
     * @var array
     */
-    protected $condition_or_setOptions = array('formula', 'set',);
+    protected $query_handling_methodOptions = array('formula', 'set', 'table');
 
     /**
     * @var array
@@ -162,9 +162,9 @@ class RulesModel {
                 'validation' => self::SQL,
                 'ajaxPreview' => array('call' => 'showSelect', 'lable' => 'Preview SQL results'),
             ),
-            'condition_or_set' => array(
+            'query_handling_method' => array(
                 'type' => 'radio',
-                'options' => $this->condition_or_setOptions,
+                'options' => $this->query_handling_methodOptions,
                 'properties' => array('required' => 1,)
             ),
             'formula' => array(
@@ -172,7 +172,7 @@ class RulesModel {
                 'properties' => array(
                     'longDesc' => 'Use the letter X to represent the number returned as a result from the SQL query',
                     'labelToPlaceholder' => 'try',
-                    'disabled' => 1,), # enabled when condition_or_set = formula
+                    'disabled' => 1,), # enabled when query_handling_method == formula
                 'validation' => self::FORMULA,
             ),
             'send_mail_to' => array(
