@@ -86,6 +86,9 @@ class labAdminTaskRunner {
         $mail->Password = $smtpConf['password'];
         $mail->SMTPAuth = $smtpConf['authentication'];
         $mail->Port = $smtpConf['port'];
+        if (isset($smtpConf['smtpsecure'])) {
+            $mail->SMTPSecure = $smtpConf['smtpsecure'];
+        }
         $mail->IsSmtp();
     }
 
@@ -133,7 +136,7 @@ class labAdminTaskRunner {
             $mail->Ical = $this->makeIcs($eventArray);
         }
         $emails = $this->createEmailList($sendTo);
-        if (!empty($this->currentSetEntry)) {
+        if (!empty($emails)) {
             foreach ($emails as $email) {
                 $mail->addAddress($email);
                 error_log("Email address added: $email".PHP_EOL, 3, $this->logFile);
@@ -191,9 +194,8 @@ class labAdminTaskRunner {
                     }
                 }
                 elseif ($details['formula'] === 'table') {
-                    $sqlResults = $this->labadmin->getSelectSet($details['sqlquery'])[0];
-                    $messageTable = $this->createTableFromArray($sqlResults);
-                    $message = $this->putTableIntoContext($messageTable, $details['message']);
+                    $sqlResults = $this->labadmin->getSelectSet($details['sqlquery']);
+                    $message = $this->putTableIntoContext($sqlResults, $details['message']);
                     $this->labAdminAlert($details['sendto'], $details['event'], $message, $details['title']);
 
                 } else {
