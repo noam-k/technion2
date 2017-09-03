@@ -12,6 +12,11 @@ class labAdminTaskRunner {
     const EMAIL_SENDER = 'noreply@labadmin.technion.ac.il';
 
     /**
+     * @var array holds the raw data from the rules DB
+     */
+    private $currentSetEntry = array();
+
+    /**
     * @var string path to log file
     */
     protected $logFile = 'taskRunnerLog.txt';
@@ -48,7 +53,7 @@ class labAdminTaskRunner {
         if (strpos($rawData, '@')) { # single email address
             return explode(',', $rawData);
         } elseif (is_int($rawData) || ctype_digit($rawData)) { # LabAdmin Group
-            return $this->labAdmin->getGroupEmails(intval($rawData));
+            return $this->labadmin->getGroupEmails(intval($rawData));
         } elseif (preg_match('/^.?+select+/i', $rawData)) {  # SQL query that starts in a select
             return $this->labadmin->getSelectSet($rawData);
         }
@@ -85,8 +90,23 @@ class labAdminTaskRunner {
     }
 
     /**
+     * @param $table array - an SQL query represented as an array
+     * @param $context - the message in which the table should be put
+     */
+    protected function putTableIntoContext($table, $context) {
+        $buildTable = '';
+        foreach ($table as $row) {
+            foreach ($row as $column => $value) {
+                $buildTable .= $column . ': '. $value . ' ; ';
+            }
+            $buildTable .= '\n';
+        }
+        return str_replace('{table}', $buildTable, $context);
+    }
+
+    /**
     * @var $sendTo string
-    * @var $event array|null
+    * @var $event string|null
     * @var $message string|null
     * @var $title string|null
     * @return int number of emails sent
@@ -95,13 +115,12 @@ class labAdminTaskRunner {
         $mail = new PHPMailer();
         $this->configureSMTP($mail);
         $mail->setFrom(self::EMAIL_SENDER);
+        $mail->Subject = $title;
         if (!empty($this->currentSetEntry)) {
             foreach ($this->currentSetEntry as $field => $value) {
-                $message = str_replace('{'.$field.'}',$value,$message);
+                $message = str_replace('{' . $field . '}', $value, $message);
             }
         }
-        $mail->Subject = $title;
-        $mail->Body = $message;
         if(!empty($event)) {
             $eventArray = unserialize($event);
             foreach ($eventArray as $key => $value) {
@@ -116,13 +135,11 @@ class labAdminTaskRunner {
         $emails = $this->createEmailList($sendTo);
         if (!empty($this->currentSetEntry)) {
             foreach ($emails as $email) {
-                foreach ($this->currentSetEntry as $field => $value) {
-                    $message = str_replace('{'.$field.'}',$value,$message);
-                }
                 $mail->addAddress($email);
                 error_log("Email address added: $email".PHP_EOL, 3, $this->logFile);
             }
         }
+        $mail->Body = $message;
         #echo '<div style="font-size:big;color:red">Debug: DONE</div>'; return count($emails);
         if ($mail->send()) {
             $sumMails = count($emails);
@@ -145,34 +162,44 @@ class labAdminTaskRunner {
         echo 'Starting script...<br/>';
         error_log('Starting script. Time: '.date('Y-m-d H:i:s').PHP_EOL, 3, $this->logFile);
         $sumMails = 0;
-        /*TODO: if basic rules are to be included:
-            1. Uncomment following lines
-            2. For each $recipients, check if they already recieved a mail (make a table in rules DB)
-                2.1. if not, send a mail
-        */
-        /*echo 'Basic Rules: <br/>';
+        /**
+         * If basic rules are to be included:
+         *   1. Uncomment following lines
+         *   2. For each $recipients, check if they already received a mail (make a table in rules DB)
+         *       2.1. if not, send a mail
+         */
+        /*
+        echo 'Basic Rules: <br/>';
         foreach ($this->rules->getRulesData(RulesModel::TABLE_RULES_BASIC, $this->admin) as $details) {
             echo 'Handling basic rule #' .$details['id'].'<br>';
             error_log('Handling basic rule #' .$details['id']. PHP_EOL, 3, $this->logFile);
             $recipients = $this->labadmin->getGroupEmails($details['recipients']);
             print_r($details); continue;
         }
-        die;*/
+        die;
+        */
 
         echo 'Flexible Rules: <br/>';
         foreach ($this->rules->getRulesData(RulesModel::TABLE_RULES_FLEXIBLE, $this->admin) as $details) {
             try {
                 echo 'Handling rule #' .$details['id'].'<br>';
                 error_log('Handling rule #'.$details['id'].PHP_EOL, 3, $this->logFile);
-                if ($details['formula'] !== 'set') {
+                if ($details['formula'] === 'set') {
+                    foreach ($this->labadmin->getSelectSet($details['sqlquery']) as $row) {
+                        $this->currentSetEntry = $row;
+                        $sumMails += $this->labAdminAlert($details['sendto'], $details['event'], $details['message'], $details['title']);
+                    }
+                }
+                elseif ($details['formula'] === 'table') {
+                    $sqlResults = $this->labadmin->getSelectSet($details['sqlquery'])[0];
+                    $messageTable = $this->createTableFromArray($sqlResults);
+                    $message = $this->putTableIntoContext($messageTable, $details['message']);
+                    $this->labAdminAlert($details['sendto'], $details['event'], $message, $details['title']);
+
+                } else {
                     $resultNumber = $this->labadmin->getCountSelect($details['sqlquery']);
                     $formula = 'return '.str_replace(self::RES_NUM, $resultNumber, $details['formula']) .';';
                     if (eval($formula)) { # The condition set by the user is fulfilled
-                        $sumMails += $this->labAdminAlert($details['sendto'], $details['event'], $details['message'], $details['title']);
-                    }
-                } else {
-                    foreach ($this->labadmin->getSelectSet($details['sqlquery']) as $row) {
-                        $this->currentSetEntry = $row;
                         $sumMails += $this->labAdminAlert($details['sendto'], $details['event'], $details['message'], $details['title']);
                     }
                 }
