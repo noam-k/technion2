@@ -56,7 +56,9 @@ class RulesController {
             case RulesModel::EMAIL :
                 $allAddressesValid = true;
                 foreach (explode(',', $value) as $emailAddress) {
-                    $allAddressesValid = $allAddressesValid && (filter_var($emailAddress, FILTER_VALIDATE_EMAIL) !== false);
+                    if (filter_var(trim($emailAddress), FILTER_VALIDATE_EMAIL) === false) {
+                        $allAddressesValid = false;
+                    }
                 }
                 return $allAddressesValid;
                 break;
