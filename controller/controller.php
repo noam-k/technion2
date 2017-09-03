@@ -54,7 +54,11 @@ class RulesController {
     protected function validate($value, $validationType) {
         switch ($validationType) {
             case RulesModel::EMAIL :
-                return filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
+                $allAddressesValid = true;
+                foreach (explode(',', $value) as $emailAddress) {
+                    $allAddressesValid = $allAddressesValid && (filter_var($emailAddress, FILTER_VALIDATE_EMAIL) !== false);
+                }
+                return $allAddressesValid;
                 break;
             case RulesModel::SQL :
                 foreach ($this->notAllowedSQLFunctions as $word) {
