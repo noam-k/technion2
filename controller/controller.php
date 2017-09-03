@@ -94,6 +94,11 @@ class RulesController {
         $this->newRuleAdded = $this->model->addNewBasicRule();
     }
 
+    /**
+     * Try to add a new flexible rule to the system
+     *
+     * @throws Exception in case one (or more) of the fields is not valid
+     */
     public function processFlexibleInput() {
         foreach ($this->model->getNewFlexibleRuleFormData() as $fieldName => $details) {
             if (!empty($details['properties']['required']) == RulesModel::REQUIRED && !isset($_POST[$fieldName])) {
@@ -158,7 +163,7 @@ class RulesController {
     }
 
     /**
-    * @var admin bool if this is true, we also display a button to remove this rule
+    * @var $admin bool if this is true, we also display a button to remove this rule
     */
     public function renderManageExistingRules($admin = false) {
         $tables = array(RulesModel::TABLE_RULES_BASIC, RulesModel::TABLE_RULES_FLEXIBLE,);
@@ -193,9 +198,11 @@ class RulesController {
     }
 
     /**
-    * @var $id int
-    * @var $table string
-    */
+     * Deletes a rule from the database
+     *
+     * @var $id int
+     * @var $table string
+     */
     public function deleteRule($id, $table) {
         if ($this->model->deleteRule($id, $table)) {
             $this->ruleDeleted = true;
