@@ -37,6 +37,27 @@ class labAdminTaskRunner {
     protected $admin;
 
     /**
+     * @param $lastRun string
+     * @param $days int
+     * @return bool
+     */
+    protected function ruleDidRunInTheLastDefinedPeriod($lastRun, $days) {
+        $lastRunUnixTimestamp = new DateTime($lastRun);
+
+        $secondsInADay = 60 * 60 * 24;
+
+        return (time() - $lastRunUnixTimestamp > $days * $secondsInADay);
+    }
+
+    /**
+     * @param $ruleDetails array
+     * @return bool
+     */
+    protected function doesRuleNeedToRun($ruleDetails) {
+        return !$this->ruleDidRunInTheLastDefinedPeriod($ruleDetails['lastrun'], $ruleDetails['days']);
+    }
+
+    /**
     * Ready for expansion to include different access levels
     * @return bool
     */
@@ -50,11 +71,11 @@ class labAdminTaskRunner {
     * @return array
     */
     protected function createEmailList($rawData) {
-        if (strpos($rawData, '@')) { # single email address
+        if (strpos($rawData, '@')) { # Comma separated
             return explode(',', $rawData);
         } elseif (is_int($rawData) || ctype_digit($rawData)) { # LabAdmin Group
             return $this->labadmin->getGroupEmails(intval($rawData));
-        } elseif (preg_match('/^.?+select+/i', $rawData)) {  # SQL query that starts in a select
+        } elseif (preg_match('/^.?+select.+/i', $rawData)) {  # SQL query that starts in a select
             return $this->labadmin->getSelectSet($rawData);
         }
         error_log('Error while parsing "sendto" field'. PHP_EOL, 3, $this->logFile);
@@ -95,6 +116,7 @@ class labAdminTaskRunner {
     /**
      * @param $table array - an SQL query represented as an array
      * @param $context - the message in which the table should be put
+     * @return string
      */
     protected function putTableIntoContext($table, $context) {
         $buildTable = '';
@@ -177,13 +199,14 @@ class labAdminTaskRunner {
             echo 'Handling basic rule #' .$details['id'].'<br>';
             error_log('Handling basic rule #' .$details['id']. PHP_EOL, 3, $this->logFile);
             $recipients = $this->labadmin->getGroupEmails($details['recipients']);
-            print_r($details); continue;
         }
-        die;
         */
 
         echo 'Flexible Rules: <br/>';
         foreach ($this->rules->getRulesData(RulesModel::TABLE_RULES_FLEXIBLE, $this->admin) as $details) {
+            if (!$this->doesRuleNeedToRun($details)) {
+                continue;
+            }
             try {
                 echo 'Handling rule #' .$details['id'].'<br>';
                 error_log('Handling rule #'.$details['id'].PHP_EOL, 3, $this->logFile);
@@ -205,6 +228,7 @@ class labAdminTaskRunner {
                         $sumMails += $this->labAdminAlert($details['sendto'], $details['event'], $details['message'], $details['title']);
                     }
                 }
+                $this->rules->updateRunTime($details['id']);
             } catch (Exception $e) {
                 echo 'Failed to execute rule #' .$details['id'].': '.$e->getMessage().'<br>';
                 error_log('Error: Rule #'.$details['id'].' failed: '.$e->getMessage().PHP_EOL, 3, $this->logFile);

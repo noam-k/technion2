@@ -45,7 +45,7 @@ class RulesModel {
     /**
     * @var array
     */
-    protected $flexibleRulesFields = array('description', 'sqlquery', 'formula', 'sendto', 'event', 'message', 'title', 'days');
+    protected $flexibleRulesFields = array('description', 'sqlquery', 'formula', 'sendto', 'event', 'message', 'title', 'days', 'lastrun');
 
     public function __construct() {
         global $rulesDatabase;
@@ -69,9 +69,11 @@ class RulesModel {
     }
 
     /**
-    * @var $table string
-    * @return array
-    */
+     * @var $table string
+     * @return array
+     *
+     * @throws Exception
+     */
     protected function getFields($table) {
         if ($table === self::TABLE_RULES_BASIC) {
             return $this->getBasicRuleFields();
@@ -300,4 +302,19 @@ class RulesModel {
         $res = $this->dbh->exec('DELETE FROM '.$table.' WHERE '.$this->rulesIdCol.' = '. intval($id));
         return $res === 1;
     }
+
+
+    /**
+     * @param $ruleId
+     * @return bool
+     */
+    public function updateRunTime($ruleId) {
+        $res = $this->dbh->exec(
+            'UPDATE '.self::TABLE_RULES_FLEXIBLE.' SET lastrun="'.time().
+            '" WHERE '.$this->rulesIdCol.' = '.$ruleId
+        );
+        return $res === 1;
+    }
+
+
 }

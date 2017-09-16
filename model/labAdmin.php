@@ -29,6 +29,7 @@ class LabAdminModel{
     /**
     * @var $query string
     * @return array
+    * @throws Exception
     */
     public function getSelectSet($query) {
         $sth = $this->dbh->prepare($query);
@@ -65,6 +66,7 @@ class LabAdminModel{
     /**
     * @var $query string
     * @return int|bool
+    * @throws Exception
     */
     public function getCountSelect($query) {
         $query = trim($query);
