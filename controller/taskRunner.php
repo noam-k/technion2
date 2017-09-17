@@ -45,14 +45,9 @@ class labAdminTaskRunner {
         if (empty($lastRun)) {
             return false;
         }
-
-        $lastRunDateTimeObject = new DateTime($lastRun);
-
-        $lastRunUnixTimestamp = $lastRunDateTimeObject->getTimestamp();
-
+        $lastRunUnixTimestamp = (int) $lastRun;
         $secondsInADay = 60 * 60 * 24;
-
-        return (time() - $lastRunUnixTimestamp > $days * $secondsInADay);
+        return (time() - $lastRunUnixTimestamp <= $days * $secondsInADay);
     }
 
     /**
