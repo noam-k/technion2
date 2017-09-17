@@ -50,6 +50,7 @@ class RulesModel {
     public function __construct() {
         global $rulesDatabase;
 		$this->dbh = new PDO($rulesDatabase['dsn'], $rulesDatabase['username'], $rulesDatabase['password']);
+        $this->dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $labAdmin = new LabAdminModel();
         $this->labadmin_groupOptions = $labAdmin->getLabAdminGroups();
 	}
@@ -309,12 +310,11 @@ class RulesModel {
      * @return bool
      */
     public function updateRunTime($ruleId) {
-        $res = $this->dbh->exec(
-            'UPDATE '.self::TABLE_RULES_FLEXIBLE.' SET lastrun="'.time().
-            '" WHERE '.$this->rulesIdCol.' = '.$ruleId
-        );
-        return $res === 1;
+        $sqlUpdateQuery = 'UPDATE '.self::TABLE_RULES_FLEXIBLE.
+            ' SET lastrun=\''.time().'\' WHERE '.$this->rulesIdCol.'='.$ruleId;
+        $sqlStatement = $this->dbh->prepare($sqlUpdateQuery);
+        $sqlStatement->execute();
+
+        return $sqlStatement->rowCount() === 1;
     }
-
-
 }

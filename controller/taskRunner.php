@@ -42,7 +42,13 @@ class labAdminTaskRunner {
      * @return bool
      */
     protected function ruleDidRunInTheLastDefinedPeriod($lastRun, $days) {
-        $lastRunUnixTimestamp = new DateTime($lastRun);
+        if (empty($lastRun)) {
+            return false;
+        }
+
+        $lastRunDateTimeObject = new DateTime($lastRun);
+
+        $lastRunUnixTimestamp = $lastRunDateTimeObject->getTimestamp();
 
         $secondsInADay = 60 * 60 * 24;
 
@@ -228,7 +234,9 @@ class labAdminTaskRunner {
                         $sumMails += $this->labAdminAlert($details['sendto'], $details['event'], $details['message'], $details['title']);
                     }
                 }
-                $this->rules->updateRunTime($details['id']);
+                if (!$this->rules->updateRunTime($details['id'])) {
+                    throw new Exception('Unable to update last run of rule!');
+                }
             } catch (Exception $e) {
                 echo 'Failed to execute rule #' .$details['id'].': '.$e->getMessage().'<br>';
                 error_log('Error: Rule #'.$details['id'].' failed: '.$e->getMessage().PHP_EOL, 3, $this->logFile);
