@@ -42,7 +42,7 @@ class labAdminTaskRunner {
      * @return bool
      */
     protected function ruleDidRunInTheLastDefinedPeriod($lastRun, $days) {
-        if (empty($lastRun)) {
+        if (empty($lastRun) || empty($days)) {
             return false;
         }
         $lastRunUnixTimestamp = (int) $lastRun;
