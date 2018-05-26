@@ -11,7 +11,7 @@ class RulesView {
     const PAGE_NEW_RULE_TITLE = 'Add new rule';
     const PAGE_NEW_RULE_HEADER = 'New rule to add:';
     const PAGE_EXISTING_RULES_TITLE = 'Rules already in the system';
-    const PAGE_EXISTING_RULES_HEADER = 'List of rules:';
+    const PAGE_EXISTING_RULES_HEADER = 'List of existing rules:';
     const PAGE_WELCOME_TITLE = 'Home Page';
     const PAGE_WELCOME_HEADER = 'Welcome to alert system for LabAdmin';
 
