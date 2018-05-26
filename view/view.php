@@ -326,7 +326,6 @@ class RulesView {
         }
         $returnValue = '<hr/><div id="'.$this->existingRulesTableId.'">';
         foreach ($headers as $key => $headerLine) {
-            $returnValue .= '<h3>'.$key.'</h3>';
             $returnValue .= '<table><thead><tr>';
             foreach ($headerLine as $column) {
                 $column = str_replace('_', ' ', $column);

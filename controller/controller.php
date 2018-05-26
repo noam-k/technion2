@@ -168,9 +168,7 @@ class RulesController {
     * @var $admin bool if this is true, we also display a button to remove this rule
     */
     public function renderManageExistingRules($admin = false) {
-        $tables = array(RulesModel::TABLE_RULES_BASIC, RulesModel::TABLE_RULES_FLEXIBLE,);
-        $headers[RulesModel::TABLE_RULES_BASIC] = $this->model->getBasicRuleFields();
-        $rules[RulesModel::TABLE_RULES_BASIC] = $this->model->getRulesData(RulesModel::TABLE_RULES_BASIC, $admin);
+        $tables = array(RulesModel::TABLE_RULES_FLEXIBLE);
         $headers[RulesModel::TABLE_RULES_FLEXIBLE] = $this->model->getFlexibleRuleFields();
         $rules[RulesModel::TABLE_RULES_FLEXIBLE] = $this->model->getRulesData(RulesModel::TABLE_RULES_FLEXIBLE, $admin);
         foreach ($tables as $table) {
