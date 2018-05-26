@@ -270,6 +270,14 @@ class RulesView {
          NOTE: Basic rules page is merley for demonstration purposes.<br/>
          The rules generated in this page will have no affect</p>';
     }
+
+    /**
+     * @return string HTML link to a page that lets the user create a new rule
+     */
+    protected function getCreateNewRuleLink() {
+        return '<a href="newFlexibleRule.php">create new rule</a>';
+    }
+
     /**
     * @var $data array
     * @var $newRuleAdded bool
@@ -325,6 +333,7 @@ class RulesView {
             $this->announcement = 'Rule deleted successfully';
         }
         $returnValue = '<hr/><div id="'.$this->existingRulesTableId.'">';
+        $returnValue .= $this->getCreateNewRuleLink();
         foreach ($headers as $key => $headerLine) {
             $returnValue .= '<table><thead><tr>';
             foreach ($headerLine as $column) {
